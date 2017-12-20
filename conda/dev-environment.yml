@@ -1,0 +1,9 @@
+name: yamanifest-dev
+
+channels:
+    - conda-forge
+    - defaults
+
+dependencies:
+    - python
+    - pbr
