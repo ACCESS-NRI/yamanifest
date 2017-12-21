@@ -22,7 +22,6 @@ from __future__ import print_function, absolute_import
 
 import os
 import yaml
-# from .item import ManifestItem
 from .hashing import hash, supported_hashes
 
 class HashExists(Exception):
@@ -129,5 +128,23 @@ class Manifest(object):
         return True
 
         
-            
-            
+    def equals(self, other, paths=True):
+        """Don't override __eq__ as need to qualify if equality also includes file paths"""
+        if isinstance(self, other.__class__):
+
+            for file in self.data['files']:
+                if file not in other.data['files']:
+                    return False
+                if paths:
+                    if self.data['files'][file]['fullpath'] != other.data['files'][file]['fullpath']:
+                        return False
+                for fn, val in self.data['files'][file]["hashes"].items():
+                    if fn not in other.data['files'][file]["hashes"]:
+                        return False
+                    if other.data['files'][file]["hashes"][fn] != val:
+                        return False
+
+            return True
+
+        else:
+            return NotImplemented

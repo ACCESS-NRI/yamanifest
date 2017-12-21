@@ -22,7 +22,7 @@ from __future__ import print_function, absolute_import
 
 import hashlib
 import io
-import nchash
+from nchash.nchash import NCDataHash
 
 length=io.DEFAULT_BUFFER_SIZE
 

@@ -6,16 +6,16 @@ General YAML manifest format
 
 .. image:: https://readthedocs.org/projects/yamanifest/badge/?version=latest
   :target: https://readthedocs.org/projects/yamanifest/?badge=latest
-.. image:: https://travis-ci.org/coecms/yamanifest.svg?branch=master
-  :target: https://travis-ci.org/coecms/yamanifest
-.. image:: https://circleci.com/gh/coecms/yamanifest.svg?style=shield
-  :target: https://circleci.com/gh/coecms/yamanifest
-.. image:: http://codecov.io/github/coecms/yamanifest/coverage.svg?branch=master
-  :target: http://codecov.io/github/coecms/yamanifest?branch=master
-.. image:: https://landscape.io/github/coecms/yamanifest/master/landscape.svg?style=flat
-  :target: https://landscape.io/github/coecms/yamanifest/master
-.. image:: https://codeclimate.com/github/coecms/yamanifest/badges/gpa.svg
-  :target: https://codeclimate.com/github/coecms/yamanifest
+.. image:: https://travis-ci.org/aidanheerdegen/yamanifest.svg?branch=master
+  :target: https://travis-ci.org/aidanheerdegen/yamanifest
+.. image:: https://circleci.com/gh/aidanheerdegen/yamanifest.svg?style=shield
+  :target: https://circleci.com/gh/aidanheerdegen/yamanifest
+.. image:: http://codecov.io/github/aidanheerdegen/yamanifest/coverage.svg?branch=master
+  :target: http://codecov.io/github/aidanheerdegen/yamanifest?branch=master
+.. image:: https://landscape.io/github/aidanheerdegen/yamanifest/master/landscape.svg?style=flat
+  :target: https://landscape.io/github/aidanheerdegen/yamanifest/master
+.. image:: https://codeclimate.com/github/aidanheerdegen/yamanifest/badges/gpa.svg
+  :target: https://codeclimate.com/github/aidanheerdegen/yamanifest
 .. image:: https://badge.fury.io/py/yamanifest.svg
   :target: https://pypi.python.org/pypi/yamanifest
 
@@ -27,7 +27,7 @@ Install
 
 Conda install::
 
-    conda install -c coecms yamanifest
+    conda install -c aidanheerdegen yamanifest
 
 Pip install (into a virtual environment)::
 
@@ -43,7 +43,7 @@ Develop
 
 Development install::
 
-    git checkout https://github.com/coecms/yamanifest
+    git checkout https://github.com/aidanheerdegen/yamanifest
     cd yamanifest
     conda env create -f conda/dev-environment.yml
     source activate yamanifest-dev

@@ -31,7 +31,7 @@ test:
         - py.test
 
 about:
-    home: https://github.com/coecms/yamanifest
+    home: https://github.com/aidanheerdegen/yamanifest
     license: Apache 2.0
     license_file: LICENSE-2.0.txt
     summary: General YAML manifest format
