@@ -43,7 +43,7 @@ class Manifest(object):
         Return a Manifest object
         """
         self.path = path
-        self.data = { 'files': {} }
+        self.data = { }
         for key, val in kwargs.items():
             setattr(self, key, val)
 
@@ -65,7 +65,7 @@ class Manifest(object):
         """
         Delete item for filepath in manifest
         """
-        del(self.data['files'][filepath])
+        del(self.data[filepath])
 
     def add_item(self, filepath, hashfn, force=False):
         """
@@ -74,15 +74,15 @@ class Manifest(object):
         otherwise raise exception
         """
 
-        if filepath in self.data['files']:
-            hashes = self.data['files'][filepath]["hashes"]
+        if filepath in self.data:
+            hashes = self.data[filepath]["hashes"]
         else:
-            self.data['files'][filepath] = {}
-            self.data['files'][filepath]["hashes"] = {}
-            hashes = self.data['files'][filepath]["hashes"]
+            self.data[filepath] = {}
+            self.data[filepath]["hashes"] = {}
+            hashes = self.data[filepath]["hashes"]
 
         # Save the latest full system path 
-        self.data['files'][filepath]['fullpath'] = os.path.realpath(filepath)
+        self.data[filepath]['fullpath'] = os.path.realpath(filepath)
 
         if type(hashfn) is str:
             functions = [hasfn,]
@@ -107,8 +107,8 @@ class Manifest(object):
         matches stored hash value
         """
 
-        if filepath in self.data['files']:
-            hashes = self.data['files'][filepath]["hashes"]
+        if filepath in self.data:
+            hashes = self.data[filepath]["hashes"]
         else:
             raise HashNonexistent('{} does not exist in manifest'.format(filepath))
 
@@ -132,16 +132,16 @@ class Manifest(object):
         """Don't override __eq__ as need to qualify if equality also includes file paths"""
         if isinstance(self, other.__class__):
 
-            for file in self.data['files']:
-                if file not in other.data['files']:
+            for file in self.data:
+                if file not in other.data:
                     return False
                 if paths:
-                    if self.data['files'][file]['fullpath'] != other.data['files'][file]['fullpath']:
+                    if self.data[file]['fullpath'] != other.data[file]['fullpath']:
                         return False
-                for fn, val in self.data['files'][file]["hashes"].items():
-                    if fn not in other.data['files'][file]["hashes"]:
+                for fn, val in self.data[file]["hashes"].items():
+                    if fn not in other.data[file]["hashes"]:
                         return False
-                    if other.data['files'][file]["hashes"][fn] != val:
+                    if other.data[file]["hashes"][fn] != val:
                         return False
 
             return True
