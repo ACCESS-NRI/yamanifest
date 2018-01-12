@@ -17,6 +17,10 @@ General YAML manifest format
 
 .. content-marker-for-sphinx
 
+Python package to generate YaML formatted manifests. This means multiple
+checksums can be stored for each file, allowing cheap checksum operations
+to cascade to more expensive hashes if required.
+
 -------
 Install
 -------
