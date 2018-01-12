@@ -12,8 +12,6 @@ General YAML manifest format
   :target: https://circleci.com/gh/aidanheerdegen/yamanifest
 .. image:: http://codecov.io/github/aidanheerdegen/yamanifest/coverage.svg?branch=master
   :target: http://codecov.io/github/aidanheerdegen/yamanifest?branch=master
-.. image:: https://codeclimate.com/github/aidanheerdegen/yamanifest/badges/gpa.svg
-  :target: https://codeclimate.com/github/aidanheerdegen/yamanifest
 .. image:: https://badge.fury.io/py/yamanifest.svg
   :target: https://pypi.python.org/pypi/yamanifest
 
