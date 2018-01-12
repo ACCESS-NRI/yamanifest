@@ -1,9 +1,13 @@
 name: yamanifest-dev
 
 channels:
+    - coecms
     - conda-forge
     - defaults
 
 dependencies:
     - python
     - pbr
+    - netcdf4
+    - libnetcdf
+
