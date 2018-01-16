@@ -68,6 +68,16 @@ def test_manifest_read_write():
 
     assert(mf1.equals(mf2) == True)
 
+def test_has_hash():
+
+    mf1 = mf.Manifest('manifest.mf1')
+        
+    mf1.load()
+
+    for filepath in mf1:
+        assert(mf1.has_hash(filepath,'md5') is not None)
+        assert(mf1.has_hash(filepath,'sha1') is not None)
+
 def test_manifest_netcdf():
 
     with cd(os.path.join('test','testfiles')):
@@ -109,3 +119,10 @@ def test_manifest_netcdf_changed_time():
         mf2.load()
 
         assert(mf3.equals(mf2) == False)
+
+        for filepath in mf2:
+
+            hashvals = {}
+
+            mf2.check_item(filepath, hashvals=hashvals)
+            print(filepath,hashvals)

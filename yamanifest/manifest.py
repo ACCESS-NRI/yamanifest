@@ -27,6 +27,9 @@ from .hashing import hash, supported_hashes
 class HashExists(Exception):
     """Trying to add a hashed value when one already exists"""
 
+class FilePathNonexistent(Exception):
+    """Trying to check a hashed value when there is none"""
+
 class HashNonexistent(Exception):
     """Trying to check a hashed value when there is none"""
 
@@ -46,6 +49,12 @@ class Manifest(object):
         self.data = { }
         for key, val in kwargs.items():
             setattr(self, key, val)
+        self.iter = 0
+        
+            
+    def __iter__(self):
+        for file in self.data:
+            yield file
 
     def load(self):
         """
@@ -85,11 +94,11 @@ class Manifest(object):
         self.data[filepath]['fullpath'] = os.path.realpath(filepath)
 
         if type(hashfn) is str:
-            functions = [hasfn,]
+            fns = [hasfn,]
         else:
-            functions = hashfn
+            fns = hashfn
             
-        for fn in functions:
+        for fn in fns:
 
             hashval = hash(filepath, fn)
 
@@ -100,29 +109,65 @@ class Manifest(object):
 
             # Set new value for this has function
             hashes[fn] = hashval
+
+    def has_path(self, filepath):
+
+        return filepath in self.data
+
+    def has_hash(self, filepath, hashfn):
+
+        hashval = None
+        if self.has_path(filepath):
+            if hashfn in self.data[filepath]["hashes"]:
+                hashval = self.data[filepath]["hashes"][hashfn]
+                # Check we have a value
+                if hashval is not None and hashval.strip():
+                    has_hash = True
+                else:
+                    print("hash value not defined {}".format(hashval))
+            else:
+                print("hash {} not in manifest".format(hashfn))
+        else:
+            print("{} not in manifest".format(filepath))
+
+        return hashval
         
-    def check_item(self, filepath, hashfns=None):
+    def check_item(self, filepath, hashfns=None, hashvals=None):
         """
         Check hash value for a filepath given a hashing function (hashfn)
         matches stored hash value
         """
 
-        if filepath in self.data:
+        fns = []
+
+        if self.has_path(filepath):
             hashes = self.data[filepath]["hashes"]
         else:
-            raise HashNonexistent('{} does not exist in manifest'.format(filepath))
+            raise FilePathNonexistent('{} does not exist in manifest'.format(filepath))
 
-        if hashfn == None:
-            functions = hashes.keys
-        elif type(hashfn) is str:
-            functions = [hasfn,]
+        if hashfns == None:
+            fns = hashes.keys()
+        elif type(hashfns) is str:
+            fns = [hasfns,]
         else:
-            functions = hashfn
+            fns = hashfns
+
+        if hashvals is not None:
+            if type(hashvals) is dict:
+                hashvals.clear()
+            else:
+                print("yamanifest :: manifest :: check_items :: hashvals must be a dict")
+                raise
             
-        for fn in functions:
-            # Short circuit and return false. Might want to
-            # save these values if they're expensive to generate
-            if hash(filepath, hashfn) != hashes[hashfn]:
+        for fn in fns:
+            hashval = hash(filepath, fn)
+            # Save these values if given list in which to return them
+            hashvals[fn] = hashval
+            if fn not in hashes:
+                hashvals[fn] = None
+                return False
+            if hashval != hashes[fn]:
+                # Short circuit and return false.
                 return False
 
         return True
