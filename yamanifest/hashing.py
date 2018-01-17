@@ -22,17 +22,19 @@ from __future__ import print_function, absolute_import
 
 import hashlib
 import io
+import os
 from nchash.nchash import NCDataHash
 
 length=io.DEFAULT_BUFFER_SIZE
+one_hundred_megabytes = 104857600
 
 # List of supported hashes and the ordering used to determine relative expense of
 # calculation
 supported_hashes = ['nchash', 'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']
 
-def hash(path, hashfn):
+def hash(path, hashfn, size=one_hundred_megabytes):
     """ A simple wrapper that inspects the hashing function and intercepts
-    calls to nchash so they are processed in a special way.
+    calls to nchash and binhash so they are processed in a special way.
 
     TODO: make plugins that allow this transparently
     """
@@ -40,6 +42,22 @@ def hash(path, hashfn):
     if hashfn == 'nchash':
         m = NCDataHash(path)
         return m.gethash()
+    elif hashfn == 'binhash':
+        m = hashlib.new('md5')
+        with io.open(path, mode="rb") as fd:
+            # Size limited hashing, so prepend the filename, size and modification time 
+            hashstring = os.path.basename(path) + str(os.path.getsize(path)) + str(os.path.getmtime(path))
+            m.update(hashstring.encode())
+            tot = 0
+            for chunk in iter(lambda: fd.read(length), b''):
+                tot += len(chunk)
+                if tot >= size:
+                    rem = (size-tot)
+                    if rem <= 0:
+                        break
+                    chunk = chunk[:rem]
+                m.update(chunk)
+        return m.hexdigest()
     else:
         # from https://stackoverflow.com/a/40961519
         m = hashlib.new(hashfn)

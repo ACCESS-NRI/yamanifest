@@ -53,6 +53,9 @@ class Manifest(object):
         
             
     def __iter__(self):
+        """
+        Iterator method
+        """
         for file in self.data:
             yield file
 
@@ -70,17 +73,17 @@ class Manifest(object):
         with open(self.path, 'w') as file:
             file.write(yaml.dump(self.data, default_flow_style=False))
 
-    def del_item(self, filepath):
+    def delete(self, filepath):
         """
         Delete item for filepath in manifest
         """
         del(self.data[filepath])
 
-    def add_item(self, filepath, hashfn, force=False):
+    def add(self, filepath, hashfn, force=False):
         """
         Add hash value for a filepath given a hashing function (hashfn).
         If there is already a hash value only overwrite if force=True,
-        otherwise raise exception
+        otherwise raise exception.
         """
 
         if filepath in self.data:
@@ -94,14 +97,12 @@ class Manifest(object):
         self.data[filepath]['fullpath'] = os.path.realpath(filepath)
 
         if type(hashfn) is str:
-            fns = [hasfn,]
+            fns = [hashfn,]
         else:
             fns = hashfn
             
         for fn in fns:
-
             hashval = hash(filepath, fn)
-
             if fn in hashes:
                 if hashes[fn] != hashval:
                     if not force:
@@ -110,14 +111,20 @@ class Manifest(object):
             # Set new value for this has function
             hashes[fn] = hashval
 
-    def has_path(self, filepath):
+    def contains(self, filepath):
+        """
+        Return True if filepath is in manifest
+        """
 
         return filepath in self.data
 
-    def has_hash(self, filepath, hashfn):
+    def get(self, filepath, hashfn):
+        """
+        Return hash value for filepath and hash function. Return None if not defined
+        """
 
         hashval = None
-        if self.has_path(filepath):
+        if self.contains(filepath):
             if hashfn in self.data[filepath]["hashes"]:
                 hashval = self.data[filepath]["hashes"][hashfn]
                 # Check we have a value
@@ -132,7 +139,7 @@ class Manifest(object):
 
         return hashval
         
-    def check_item(self, filepath, hashfns=None, hashvals=None):
+    def check_file(self, filepath, hashfns=None, hashvals=None):
         """
         Check hash value for a filepath given a hashing function (hashfn)
         matches stored hash value
@@ -140,7 +147,7 @@ class Manifest(object):
 
         fns = []
 
-        if self.has_path(filepath):
+        if self.contains(filepath):
             hashes = self.data[filepath]["hashes"]
         else:
             raise FilePathNonexistent('{} does not exist in manifest'.format(filepath))
@@ -172,12 +179,25 @@ class Manifest(object):
 
         return True
 
+    def fullpath(self, filepath):
+        """
+        Return fullpath string for filepath. None if not defined
+        """
+
+        if self.contains(filepath):
+            return self.data[filepath]['fullpath']
+        else:
+            return None
         
     def equals(self, other, paths=True):
-        """Don't override __eq__ as need to qualify if equality also includes file paths"""
+        """
+        Test if this manifest is the same as another manifest object.
+        Made this a bound method instead of overriding __eq__ as need to 
+        qualify if equality also includes file paths
+        """
         if isinstance(self, other.__class__):
 
-            for file in self.data:
+            for file in self:
                 if file not in other.data:
                     return False
                 if paths:
