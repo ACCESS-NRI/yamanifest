@@ -50,6 +50,7 @@ class Manifest(object):
         for key, val in kwargs.items():
             setattr(self, key, val)
         self.iter = 0
+        self.lookup = {}
         
             
     def __iter__(self):
@@ -65,7 +66,8 @@ class Manifest(object):
         """
         with open(self.path, 'r') as file:
             self.data = yaml.load(file)
-
+        # self._make_lookup()
+        
     def dump(self):
         """
         Dump manifest from YAML file
@@ -108,7 +110,7 @@ class Manifest(object):
                     if not force:
                         raise HashExists('Tried to add {} to {}'.format(fn,filepath))
 
-            # Set new value for this has function
+            # Set new value for this hash function
             hashes[fn] = hashval
 
     def contains(self, filepath):
@@ -127,15 +129,15 @@ class Manifest(object):
         if self.contains(filepath):
             if hashfn in self.data[filepath]["hashes"]:
                 hashval = self.data[filepath]["hashes"][hashfn]
-                # Check we have a value
-                if hashval is not None and hashval.strip():
-                    has_hash = True
-                else:
-                    print("hash value not defined {}".format(hashval))
-            else:
-                print("hash {} not in manifest".format(hashfn))
-        else:
-            print("{} not in manifest".format(filepath))
+                # Check we have a valid hash value (can't just be whitespace)
+                if not hashval.strip():
+                    hashval = False
+                # else:
+                #     print("hash value not defined {}".format(hashval))
+            # else:
+                # print("hash {} not in manifest".format(hashfn))
+        # else:
+            # print("{} not in manifest".format(filepath))
 
         return hashval
         
@@ -167,14 +169,44 @@ class Manifest(object):
                 raise
             
         for fn in fns:
+            if fn not in hashes:
+                if hashvals is not None:
+                    hashvals[fn] = None
+                return False
             hashval = hash(filepath, fn)
             # Save these values if given list in which to return them
-            hashvals[fn] = hashval
-            if fn not in hashes:
-                hashvals[fn] = None
-                return False
+            if hashvals is not None:
+                hashvals[fn] = hashval
             if hashval != hashes[fn]:
                 # Short circuit and return false.
+                return False
+
+        return True
+
+    def check(self, hashfns=None, hashvals=None):
+        """
+        Check hash value for all filepaths given a hashing function (hashfn)
+        matches stored hash value
+        """
+
+        if hashvals is not None:
+            if type(hashvals) is dict:
+                hashvals.clear()
+            else:
+                print("yamanifest :: manifest :: check_items :: hashvals must be a dict")
+                raise
+            
+        for filepath in self:
+
+            if hashvals is not None:
+                tmphashvals = {}
+            else:
+                tmphashvals = None
+
+            if not self.check_file(filepath,hashfns,tmphashvals):
+                if hashvals is not None:
+                    # Save hashes which do not match
+                    hashvals[filepath] = tmphashvals
                 return False
 
         return True
@@ -213,3 +245,47 @@ class Manifest(object):
 
         else:
             return NotImplemented
+
+    def find(self, hashfn, hashval):
+        """
+        Find a hashfn value in a manifest. Return filepath on success, None otherwise
+        """
+        for filepath in self.data:
+            if hashval == self.get(filepath, hashfn) and hashval is not None:
+                return filepath
+
+        return None
+
+        
+    def find_from_lookup(self, hashfn, hashval):
+        """
+        Find a hashfn value in a manifest. Return filepath on success, None otherwise
+        """
+        if (hashfn,hashval) in self.lookup:
+            return self.lookup[(hashfn,hashval)]
+        else:
+            return None
+
+    def _make_lookup(self):
+        for filepath in self:
+            for fn in self.data[filepath]["hashes"]:
+                self._add_lookup(filepath,fn)
+
+    def _add_lookup(self,filepath,hashfn):
+        hashval = self.data[filepath]["hashes"][hashfn]
+        self.lookup[(hashfn,hashval)] = filepath
+
+    def update(self, other):
+        """
+        Update (add) hashes from other manifest where matches exist some hashes
+        """
+
+        for filepath in self:
+            for hashfn in self.data[filepath]["hashes"]:
+                hashval = self.data[filepath]["hashes"][hashfn]
+                newfilepath = other.find(hashfn,hashval)
+                if newfilepath is not None:
+                    # Check other hashes are consistent?
+                    self.data[filepath]["hashes"].update(other.data[newfilepath]["hashes"])
+                    break
+

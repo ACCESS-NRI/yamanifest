@@ -73,7 +73,6 @@ def test_manifest_read_write():
     for filepath in files:
         mf1.add(os.path.join('test',filepath),['md5','sha1'])
 
-
     mf1.dump()
 
     mf2 = mf.Manifest('manifest.mf1')
@@ -150,6 +149,7 @@ def test_manifest_hash_with_size():
             mf4.add(filepath,hashfn='binhash')
 
         mf4.dump()
+        assert(mf4.check() == True)
 
         mf5 = mf.Manifest('manifest.mf5')
 
@@ -157,5 +157,49 @@ def test_manifest_hash_with_size():
             touch(filepath)
             mf5.add(filepath,hashfn='binhash')
 
-
+        hashvals = {}
+        assert(mf4.check() == False)
         assert(mf5.equals(mf4) == False)
+
+def test_manifest_find():
+
+    with cd(os.path.join('test','testfiles')):
+
+        mf1 = mf.Manifest('manifest.mf1')
+
+        mf1.load()
+
+    for filepath in mf1:
+        # Test for hashes we know should be in the manifest
+        for hashfn in ['nchash','md5','sha1']:
+            hashval = mf1.get(filepath,hashfn)
+            print(hashfn,hashval,filepath,mf1.find(hashfn,hashval))
+            assert(mf1.find(hashfn,hashval) == filepath)
+
+        # Test for one we know shouldn't be there
+        for hashfn in ['binhash',]:
+            hashval = mf1.get(filepath,hashfn)
+            print(hashfn,hashval,filepath,mf1.find(hashfn,hashval))
+            assert(mf1.find(hashfn,hashval) == None)
+
+    with cd(os.path.join('test','testfiles')):
+
+        mf2 = mf.Manifest('manifest.mf2')
+
+        for filepath in glob.glob('*.nc'):
+            mf1.add(filepath,['nchash'])
+
+        mf2.update(mf1)
+
+        assert(mf2.equals(mf1))
+
+    mf3 = mf.Manifest('manifest.mf3')
+    
+    for filepath in glob.glob(os.path.join('test','testfiles','*.nc')):
+        mf3.add(filepath,['nchash'])
+
+    mf3.update(mf1)
+
+    # Manifests should not be equal, their filepaths differ
+    assert(mf3.equals(mf1) == False)
+
