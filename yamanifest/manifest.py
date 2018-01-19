@@ -41,16 +41,19 @@ class Manifest(object):
         data: an dictionary of manifest items
     """
 
-    def __init__(self, path, **kwargs):
+    def __init__(self, path, hashes=None, **kwargs):
         """
-        Return a Manifest object
+        Return a Manifest object, initialised with a path
+        to the manifest file. Optionally specify default
+        order of hashes to use when checking manifest validity
         """
         self.path = path
         self.data = { }
         for key, val in kwargs.items():
             setattr(self, key, val)
         self.iter = 0
-        self.lookup = {}
+        self.hashes = hashes
+        # self.lookup = {}
         
             
     def __iter__(self):
@@ -105,13 +108,16 @@ class Manifest(object):
             
         for fn in fns:
             hashval = hash(filepath, fn)
-            if fn in hashes:
-                if hashes[fn] != hashval:
-                    if not force:
-                        raise HashExists('Tried to add {} to {}'.format(fn,filepath))
+            # If we've used an incompatible hashing function it will return
+            # None and we will silently discard this hash
+            if hashval is not None:
+                if fn in hashes:
+                    if hashes[fn] != hashval:
+                        if not force:
+                            raise HashExists('Tried to add {} to {}'.format(fn,filepath))
 
-            # Set new value for this hash function
-            hashes[fn] = hashval
+                # Set new value for this hash function
+                hashes[fn] = hashval
 
     def contains(self, filepath):
         """
@@ -141,10 +147,12 @@ class Manifest(object):
 
         return hashval
         
-    def check_file(self, filepath, hashfns=None, hashvals=None):
+    def check_file(self, filepath, hashfns=None, hashvals=None, shortcircuit=True):
         """
         Check hash value for a filepath given a hashing function (hashfn)
-        matches stored hash value
+        matches stored hash value. Return values of non-matching hashes in
+        if hashvals dict supplied. If shortcircuit is True, will return True
+        or False result with first True/False result
         """
 
         fns = []
@@ -155,7 +163,10 @@ class Manifest(object):
             raise FilePathNonexistent('{} does not exist in manifest'.format(filepath))
 
         if hashfns == None:
-            fns = hashes.keys()
+            if self.hashes is not None:
+                fns = self.hashes
+            else:
+                fns = hashes.keys()
         elif type(hashfns) is str:
             fns = [hasfns,]
         else:
@@ -169,17 +180,23 @@ class Manifest(object):
                 raise
             
         for fn in fns:
+            # Ignore hash test if it does not exist in the manifest. Need this behaviour
+            # so we can cascade hashes which in some cases are incompatible with certains
+            # file types, e.g. nchash
             if fn not in hashes:
                 if hashvals is not None:
                     hashvals[fn] = None
-                return False
-            hashval = hash(filepath, fn)
-            # Save these values if given list in which to return them
-            if hashvals is not None:
-                hashvals[fn] = hashval
-            if hashval != hashes[fn]:
-                # Short circuit and return false.
-                return False
+            else:
+                hashval = hash(filepath, fn)
+                # Save these values if given list in which to return them
+                if hashvals is not None:
+                    hashvals[fn] = hashval
+                if hashval != hashes[fn]:
+                    if shortcircuit:
+                        return False
+                else:
+                    if shortcircuit:
+                        return True
 
         return True
 

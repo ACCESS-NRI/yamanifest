@@ -23,7 +23,8 @@ from __future__ import print_function, absolute_import
 import hashlib
 import io
 import os
-from nchash.nchash import NCDataHash
+import sys
+from nchash.nchash import NCDataHash, NotNetcdfFileError
 
 length=io.DEFAULT_BUFFER_SIZE
 one_hundred_megabytes = 104857600
@@ -40,8 +41,14 @@ def hash(path, hashfn, size=one_hundred_megabytes):
     """
 
     if hashfn == 'nchash':
+        hashval = ''
         m = NCDataHash(path)
-        return m.gethash()
+        try:
+            hashval = m.gethash()
+        except NotNetcdfFileError as e:
+            sys.stderr.write(str(e))
+            hashval = None
+        return hashval
     elif hashfn == 'binhash':
         m = hashlib.new('md5')
         with io.open(path, mode="rb") as fd:

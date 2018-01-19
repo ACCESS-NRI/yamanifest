@@ -126,10 +126,12 @@ def test_manifest_netcdf_changed_time():
             touch(filepath)
             mf3.add(filepath,['nchash','md5','sha1'])
 
+        mf3.dump()
+
         mf2 = mf.Manifest('manifest.mf2')
         mf2.load()
 
-        assert(mf3.equals(mf2) == False)
+        assert(not mf3.equals(mf2))
 
         for filepath in mf2:
 
@@ -139,7 +141,7 @@ def test_manifest_netcdf_changed_time():
             print(filepath,hashvals)
 
 
-def test_manifest_hash_with_size():
+def test_manifest_hash_with_binhash():
 
     with cd(os.path.join('test','testfiles_copy')):
 
@@ -149,7 +151,7 @@ def test_manifest_hash_with_size():
             mf4.add(filepath,hashfn='binhash')
 
         mf4.dump()
-        assert(mf4.check() == True)
+        assert(mf4.check())
 
         mf5 = mf.Manifest('manifest.mf5')
 
@@ -158,8 +160,8 @@ def test_manifest_hash_with_size():
             mf5.add(filepath,hashfn='binhash')
 
         hashvals = {}
-        assert(mf4.check() == False)
-        assert(mf5.equals(mf4) == False)
+        assert(not mf4.check())
+        assert(not mf5.equals(mf4))
 
 def test_manifest_find():
 
@@ -193,6 +195,8 @@ def test_manifest_find():
 
         assert(mf2.equals(mf1))
 
+    # Make same manifest but from the root directory, so have different file
+    # paths
     mf3 = mf.Manifest('manifest.mf3')
     
     for filepath in glob.glob(os.path.join('test','testfiles','*.nc')):
@@ -201,5 +205,17 @@ def test_manifest_find():
     mf3.update(mf1)
 
     # Manifests should not be equal, their filepaths differ
-    assert(mf3.equals(mf1) == False)
+    assert(not mf3.equals(mf1))
+
+def test_manifest_with_mixed_file_types():
+
+    with cd(os.path.join('test','testfiles_copy')):
+
+        mf6 = mf.Manifest('manifest.mf6')
+
+        for filepath in glob.glob('*.bin') + glob.glob('*.nc'):
+            mf6.add(filepath,hashfn=['nchash','binhash'])
+
+        mf6.dump()
+        assert(mf6.check())
 
