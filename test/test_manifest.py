@@ -219,3 +219,8 @@ def test_manifest_with_mixed_file_types():
         mf6.dump()
         assert(mf6.check())
 
+        # Should have no nchash for the bin files
+        for filepath in glob.glob('*.bin'):
+            assert(mf6.get(filepath,hashfn='nchash') == None)
+
+
