@@ -65,11 +65,11 @@ def setup_module(module):
 def teardown_module(module):
     if verbose: print ("teardown_module   module:%s" % module.__name__)
     shutil.rmtree(os.path.join('test','testfiles_copy'),ignore_errors=True)
-    os.remove(os.path.join('test','testfiles','manifest.mf1'))
+    os.remove(os.path.join('test','testfiles','mf1.yaml'))
 
 def test_manifest_read_write():
 
-    mf1 = mf.Manifest('manifest.mf1')
+    mf1 = mf.Manifest('mf1.yaml')
 
     files = ['file1','file2']
 
@@ -78,7 +78,7 @@ def test_manifest_read_write():
 
     mf1.dump()
 
-    mf2 = mf.Manifest('manifest.mf1')
+    mf2 = mf.Manifest('mf1.yaml')
         
     mf2.load()
 
@@ -86,7 +86,7 @@ def test_manifest_read_write():
 
 def test_has_hash():
 
-    mf1 = mf.Manifest('manifest.mf1')
+    mf1 = mf.Manifest('mf1.yaml')
         
     mf1.load()
 
@@ -98,7 +98,7 @@ def test_manifest_netcdf():
 
     with cd(os.path.join('test','testfiles')):
 
-        mf1 = mf.Manifest('manifest.mf1')
+        mf1 = mf.Manifest('mf1.yaml')
 
         for filepath in glob.glob('*.nc'):
             mf1.add(filepath,['nchash','md5','sha1'])
@@ -107,7 +107,7 @@ def test_manifest_netcdf():
 
     with cd(os.path.join('test','testfiles_copy')):
 
-        mf2 = mf.Manifest('manifest.mf2')
+        mf2 = mf.Manifest('mf2.yaml')
         
         for filepath in glob.glob('*.nc'):
             mf2.add(filepath,['nchash','md5','sha1'])
@@ -123,7 +123,7 @@ def test_manifest_netcdf_changed_time():
 
     with cd(os.path.join('test','testfiles_copy')):
 
-        mf3 = mf.Manifest('manifest.mf3')
+        mf3 = mf.Manifest('mf3.yaml')
 
         for filepath in glob.glob('*.nc'):
             touch(filepath)
@@ -131,7 +131,7 @@ def test_manifest_netcdf_changed_time():
 
         mf3.dump()
 
-        mf2 = mf.Manifest('manifest.mf2')
+        mf2 = mf.Manifest('mf2.yaml')
         mf2.load()
 
         assert(not mf3.equals(mf2))
@@ -148,7 +148,7 @@ def test_manifest_hash_with_binhash():
 
     with cd(os.path.join('test','testfiles_copy')):
 
-        mf4 = mf.Manifest('manifest.mf4')
+        mf4 = mf.Manifest('mf4.yaml')
 
         for filepath in glob.glob('*.bin'):
             mf4.add(filepath,hashfn='binhash')
@@ -156,7 +156,7 @@ def test_manifest_hash_with_binhash():
         mf4.dump()
         assert(mf4.check())
 
-        mf5 = mf.Manifest('manifest.mf5')
+        mf5 = mf.Manifest('mf5.yaml')
 
         for filepath in glob.glob('*.bin'):
             touch(filepath)
@@ -170,7 +170,7 @@ def test_manifest_find():
 
     with cd(os.path.join('test','testfiles')):
 
-        mf1 = mf.Manifest('manifest.mf1')
+        mf1 = mf.Manifest('mf1.yaml')
 
         mf1.load()
 
@@ -189,7 +189,7 @@ def test_manifest_find():
 
     with cd(os.path.join('test','testfiles')):
 
-        mf2 = mf.Manifest('manifest.mf2')
+        mf2 = mf.Manifest('mf2.yaml')
 
         for filepath in glob.glob('*.nc'):
             mf1.add(filepath,['nchash'])
@@ -200,7 +200,7 @@ def test_manifest_find():
 
     # Make same manifest but from the root directory, so have different file
     # paths
-    mf3 = mf.Manifest('manifest.mf3')
+    mf3 = mf.Manifest('mf3.yaml')
     
     for filepath in glob.glob(os.path.join('test','testfiles','*.nc')):
         mf3.add(filepath,['nchash'])
@@ -214,7 +214,7 @@ def test_manifest_with_mixed_file_types():
 
     with cd(os.path.join('test','testfiles_copy')):
 
-        mf6 = mf.Manifest('manifest.mf6')
+        mf6 = mf.Manifest('mf6.yaml')
 
         for filepath in glob.glob('*.bin') + glob.glob('*.nc'):
             mf6.add(filepath,hashfn=['nchash','binhash'])
@@ -227,3 +227,36 @@ def test_manifest_with_mixed_file_types():
             assert(mf6.get(filepath,hashfn='nchash') == None)
 
 
+def test_open_manifest_and_add():
+
+    # Create manifest as above, but in two steps, writing out
+    # the manifest file in between, deleting the object and reading
+    # it back in and then adding the second lot of files
+    with cd(os.path.join('test','testfiles_copy')):
+
+        mf7 = mf.Manifest('mf7.yaml')
+
+        for filepath in glob.glob('*.nc'):
+            mf7.add(filepath,hashfn=['nchash','binhash'])
+
+        mf7.dump()
+
+        del(mf7)
+
+        mf7 = mf.Manifest('mf7.yaml')
+        mf7.load()
+
+        for filepath in glob.glob('*.nc'):
+            mf7.add(filepath,hashfn=['nchash','binhash'])
+
+        mf7.dump()
+
+        del(mf7)
+
+        mf7 = mf.Manifest('mf7.yaml')
+
+        mf6 = mf.Manifest('mf6.yaml')
+
+        mf6.load()
+
+        assert(mf7.equals(mf6))
