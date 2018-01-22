@@ -17,8 +17,10 @@ limitations under the License.
 from __future__ import print_function
 
 import pytest
-import os, time, glob
+import sys, os, time, glob
 import shutil
+
+print("Version: {}".format(sys.version))
 
 import yamanifest.manifest as mf
 
@@ -55,6 +57,7 @@ class cd:
 
 def setup_module(module):
     if verbose: print ("setup_module      module:%s" % module.__name__)
+    if verbose: print ("Python version: {}".format(sys.version))
     shutil.copytree(os.path.join('test','testfiles'),os.path.join('test','testfiles_copy'))
     make_random_binary_file(os.path.join('test','testfiles_copy','25mb.bin'),25*1024*1024)
     make_random_binary_file(os.path.join('test','testfiles_copy','100mb.bin'),100*1024*1024)
