@@ -24,7 +24,7 @@ import hashlib
 import io
 import os
 import sys
-from nchash.nchash import NCDataHash, NotNetcdfFileError
+from nchash import NCDataHash, NotNetcdfFileError
 
 length=io.DEFAULT_BUFFER_SIZE
 one_hundred_megabytes = 104857600
