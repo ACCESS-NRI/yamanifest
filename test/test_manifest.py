@@ -22,7 +22,7 @@ import shutil
 
 print("Version: {}".format(sys.version))
 
-import yamanifest.manifest as mf
+from yamanifest import manifest as mf
 
 verbose = True
 
