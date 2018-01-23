@@ -52,7 +52,10 @@ class Manifest(object):
         for key, val in kwargs.items():
             setattr(self, key, val)
         self.iter = 0
-        self.hashes = hashes
+        if hashes is None:
+            self.hashes = ['nchash','binhash','md5']
+        else:
+            self.hashes = hashes
         # self.lookup = {}
         
             
@@ -84,7 +87,7 @@ class Manifest(object):
         """
         del(self.data[filepath])
 
-    def add(self, filepath, hashfn, force=False):
+    def add(self, filepath, hashfn=None, force=False):
         """
         Add hash value for a filepath given a hashing function (hashfn).
         If there is already a hash value only overwrite if force=True,
@@ -101,10 +104,13 @@ class Manifest(object):
         # Save the latest full system path 
         self.data[filepath]['fullpath'] = os.path.realpath(filepath)
 
-        if type(hashfn) is str:
-            fns = [hashfn,]
+        if hashfn is None:
+            fns = self.hashes
         else:
-            fns = hashfn
+            if type(hashfn) is str:
+                fns = [hashfn,]
+            else:
+                fns = hashfn
             
         for fn in fns:
             hashval = hash(filepath, fn)
