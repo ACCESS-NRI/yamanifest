@@ -26,17 +26,22 @@ import yaml
 from yamanifest import manifest as mf
 
 def parse_args(args):
-
+    """
+    Parse arguments given as list (args)
+    """
     parser = argparse.ArgumentParser(description="Run yamf on one or more files")
     parser.add_argument("-n","--name", help="Manifest file name", default='manifest.yaml')
     parser.add_argument("-f","--force", help="Force overwrite of existing manifest", action='store_true')
     parser.add_argument("-c","--check", help="Check manifest file hashes", action='store_true')
+    parser.add_argument("-s","--hashes", help="Use only these hashing functions", action='append')
     parser.add_argument("inputs", help="files", nargs='*')
 
     return parser.parse_args(args)
 
 def main(args):
-
+    """
+    Main routine. Takes return value from parse.parse_args as input
+    """
     mf1 = mf.Manifest(args.name)
 
     if os.path.exists(args.name):
@@ -48,22 +53,28 @@ def main(args):
         if len(args.inputs) > 0:
             print("File arguments ignored with --check option", file=sys.stderr)
         hashvals = {}
-        if mf1.check(hashvals=hashvals):
+        if mf1.check(hashfn=args.hashes,hashvals=hashvals):
             print("{} :: hashes are correct".format(args.name))
         else:
             print("{} :: hashes do not match! {}".format(args.name,hashvals))
             sys.exit(1)
     else:
         for filepath in args.inputs:
-            mf1.add(filepath,force=args.force)
+            mf1.add(filepath,hashfn=args.hashes,force=args.force)
         mf1.dump()
             
 
-def main_argv():
-    
-    args = parse_args(sys.argv[1:])
+def main_parse_args(args):
+    """
+    Call main with list of arguments. Callable from tests
+    """
+    main(parse_args(args))
 
-    main(args)
+def main_argv():
+    """
+    Call main and pass command line arguments. This is required for setup.py entry_points
+    """
+    main_parse_args(sys.argv[1:])
 
 if __name__ == "__main__":
 

@@ -23,6 +23,7 @@ import shutil
 print("Version: {}".format(sys.version))
 
 from yamanifest import manifest as mf
+from yamanifest import yamf
 
 verbose = True
 
@@ -246,7 +247,7 @@ def test_open_manifest_and_add():
         mf7 = mf.Manifest('mf7.yaml')
         mf7.load()
 
-        for filepath in glob.glob('*.nc'):
+        for filepath in glob.glob('*.bin'):
             mf7.add(filepath,hashfn=['nchash','binhash'])
 
         mf7.dump()
@@ -254,9 +255,27 @@ def test_open_manifest_and_add():
         del(mf7)
 
         mf7 = mf.Manifest('mf7.yaml')
-
+        mf7.load()
         mf6 = mf.Manifest('mf6.yaml')
-
         mf6.load()
 
         assert(mf7.equals(mf6))
+
+
+def test_yamf():
+
+    # Create manifest as above, but in two steps, writing out
+    # the manifest file in between, deleting the object and reading
+    # it back in and then adding the second lot of files
+    with cd(os.path.join('test','testfiles_copy')):
+
+        files  = glob.glob('*.bin') + glob.glob('*.nc')
+        yamf.main_parse_args(["-n","mf8.yaml", "-s", "binhash", "-s", "nchash"] + files)
+
+        mf8 = mf.Manifest('mf8.yaml')
+        mf8.load()
+
+        mf6 = mf.Manifest('mf6.yaml')
+        mf6.load()
+
+        assert(mf8.equals(mf6))
