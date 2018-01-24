@@ -30,11 +30,21 @@ def parse_args(args):
     Parse arguments given as list (args)
     """
     parser = argparse.ArgumentParser(description="Run yamf on one or more files")
-    parser.add_argument("-n","--name", help="Manifest file name", default='manifest.yaml')
-    parser.add_argument("-f","--force", help="Force overwrite of existing manifest", action='store_true')
-    parser.add_argument("-c","--check", help="Check manifest file hashes", action='store_true')
-    parser.add_argument("-s","--hashes", help="Use only these hashing functions", action='append')
-    parser.add_argument("inputs", help="files", nargs='*')
+
+    subparsers = parser.add_subparsers(dest='command', title='Subcommands',help='Valid subcommands')
+
+    # Add sub command
+    parser_add = subparsers.add_parser('add', help='Add filepaths to manifest')
+    parser_add.add_argument('-n','--name', default='manifest.yaml', action='store', help='Manifest file name')
+    parser_add.add_argument("-f","--force", help="Force overwrite of existing manifest", action='store_true')
+    parser_add.add_argument("-s","--hashes", help="Use only these hashing functions", action='append')
+    parser_add.add_argument("files", help="File paths to add to manifest", nargs='+')
+
+    # Check sub command
+    parser_check = subparsers.add_parser('check', help='Check manifest')
+    parser_check.add_argument('-n','--name', default='manifest.yaml', action='store', help='Manifest file name')
+    parser_check.add_argument("-s","--hashes", help="Use only these hashing functions", action='append')
+    parser_check.add_argument("files", help="Check only these files", nargs='*')
 
     return parser.parse_args(args)
 
@@ -43,32 +53,32 @@ def main(args):
     Main routine. Takes return value from parse.parse_args as input
     """
     mf1 = mf.Manifest(args.name)
+    if args.command == 'add':
+        if os.path.exists(args.name):
+            # If manifest exists load existing hash data unless --force
+            if not args.force:
+                mf1.load()
+        for filepath in args.files:
+            mf1.add(filepath,hashfn=args.hashes,force=args.force)
+        mf1.dump()
 
-    if os.path.exists(args.name):
-        # If manifest exists load existing hash data unless --force
-        if not args.force:
-            mf1.load()
-
-    if args.check:
-        if len(args.inputs) > 0:
-            print("File arguments ignored with --check option", file=sys.stderr)
+    elif args.command == 'check':
         hashvals = {}
         if mf1.check(hashfn=args.hashes,hashvals=hashvals):
             print("{} :: hashes are correct".format(args.name))
+            return True
         else:
             print("{} :: hashes do not match! {}".format(args.name,hashvals))
             sys.exit(1)
-    else:
-        for filepath in args.inputs:
-            mf1.add(filepath,hashfn=args.hashes,force=args.force)
-        mf1.dump()
-            
+
 
 def main_parse_args(args):
     """
     Call main with list of arguments. Callable from tests
     """
-    main(parse_args(args))
+    # Must return so that check command return value is passed back to calling routine
+    # otherwise py.test will fail
+    return main(parse_args(args))
 
 def main_argv():
     """

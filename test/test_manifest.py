@@ -270,7 +270,7 @@ def test_yamf():
     with cd(os.path.join('test','testfiles_copy')):
 
         files  = glob.glob('*.bin') + glob.glob('*.nc')
-        yamf.main_parse_args(["-n","mf8.yaml", "-s", "binhash", "-s", "nchash"] + files)
+        yamf.main_parse_args(["add","-n","mf8.yaml", "-s", "binhash", "-s", "nchash"] + files)
 
         mf8 = mf.Manifest('mf8.yaml')
         mf8.load()
@@ -279,3 +279,4 @@ def test_yamf():
         mf6.load()
 
         assert(mf8.equals(mf6))
+        assert(yamf.main_parse_args(["check","-n","mf8.yaml", "-s", "binhash", "-s", "nchash"]))
