@@ -19,8 +19,8 @@ requirements:
     run:
         - python
         - six
-	- pyyaml
-	- nchash
+        - pyyaml
+        - nchash
 
 test:
     source_files:
