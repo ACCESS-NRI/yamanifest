@@ -153,7 +153,7 @@ class Manifest(object):
 
         return hashval
         
-    def check_file(self, filepath, hashfn=None, hashvals=None, shortcircuit=True):
+    def check_file(self, filepath, hashfn=None, hashvals=None, shortcircuit=False, condition=all):
         """
         Check hash value for a filepath given a hashing function (hashfn)
         matches stored hash value. Return values of non-matching hashes in
@@ -174,7 +174,7 @@ class Manifest(object):
             else:
                 fns = hashes.keys()
         elif type(hashfn) is str:
-            fns = [hasfn,]
+            fns = [hashfn,]
         else:
             fns = hashfn
 
@@ -185,6 +185,8 @@ class Manifest(object):
                 print("yamanifest :: manifest :: check_items :: hashvals must be a dict")
                 raise
             
+        status = []
+
         for fn in fns:
             # Ignore hash test if it does not exist in the manifest. Need this behaviour
             # so we can cascade hashes which in some cases are incompatible with certains
@@ -200,13 +202,15 @@ class Manifest(object):
                 if hashval != hashes[fn]:
                     if shortcircuit:
                         return False
+                    status.append(False)
                 else:
                     if shortcircuit:
                         return True
+                    status.append(True)
 
-        return True
+        return condition(status)
 
-    def check(self, hashfn=None, hashvals=None):
+    def check(self, hashvals=None, **args):
         """
         Check hash value for all filepaths given a hashing function (hashfn)
         matches stored hash value
@@ -226,7 +230,7 @@ class Manifest(object):
             else:
                 tmphashvals = None
 
-            if not self.check_file(filepath,hashfn,tmphashvals):
+            if not self.check_file(filepath=filepath,hashvals=tmphashvals,**args):
                 if hashvals is not None:
                     # Save hashes which do not match
                     hashvals[filepath] = tmphashvals

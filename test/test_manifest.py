@@ -280,3 +280,44 @@ def test_yamf():
 
         assert(mf8.equals(mf6))
         assert(yamf.main_parse_args(["check","-n","mf8.yaml", "-s", "binhash", "-s", "nchash"]))
+
+
+def test_shortcircuit_condition():
+
+    with cd(os.path.join('test','testfiles_copy')):
+
+        mf8 = mf.Manifest('mf8.yaml')
+        mf8.load()
+        assert(mf8.check())
+
+        # Alter a hash and make sure check fails
+
+        files  = glob.glob('*.bin') + glob.glob('*.nc')
+
+        print(files[-1])
+        print(mf8.data[files[-1]])
+
+        mf8.data[files[-1]]["hashes"]["binhash"] = 0
+        
+        print(mf8.data[files[-1]])
+        print(mf8.check())
+
+        assert(not mf8.check())
+
+        # Reload and check it reads in properly again
+
+        mf8.load()
+        assert(mf8.check())
+
+        mf8.data[files[-1]]["hashes"]["binhash"] = 0
+
+        # nchash should be true
+        assert(mf8.check(hashfn='nchash'))
+        # binhash should not be true (set to incorrect value above)
+        assert(not mf8.check(hashfn='binhash'))
+
+        # Set truth condition to any, so happy if any of the hashes
+        # are correct
+        assert(mf8.check(condition=any))
+
+        assert(yamf.main_parse_args(["check","-n","mf8.yaml","--any"]))

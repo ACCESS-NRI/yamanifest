@@ -44,6 +44,7 @@ def parse_args(args):
     parser_check = subparsers.add_parser('check', help='Check manifest')
     parser_check.add_argument('-n','--name', default='manifest.yaml', action='store', help='Manifest file name')
     parser_check.add_argument("-s","--hashes", help="Use only these hashing functions", action='append')
+    parser_check.add_argument("-a","--any", help="Return true if any of the hashes match (default is true if all match)", action='store_true')
     parser_check.add_argument("files", help="Check only these files", nargs='*')
 
     return parser.parse_args(args)
@@ -64,7 +65,11 @@ def main(args):
 
     elif args.command == 'check':
         hashvals = {}
-        if mf1.check(hashfn=args.hashes,hashvals=hashvals):
+        if args.any:
+            condition = any
+        else:
+            condition = all
+        if mf1.check(hashfn=args.hashes,hashvals=hashvals,condition=condition):
             print("{} :: hashes are correct".format(args.name))
             return True
         else:
