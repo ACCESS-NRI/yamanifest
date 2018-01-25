@@ -319,5 +319,10 @@ def test_shortcircuit_condition():
         # Set truth condition to any, so happy if any of the hashes
         # are correct
         assert(mf8.check(condition=any))
-
         assert(yamf.main_parse_args(["check","-n","mf8.yaml","--any"]))
+
+        # These options are essentially contradictory. shortcircuit
+        # will in effect override the condition option. In this case
+        # it returns true because the first hash it tested is true
+        assert(mf8.check(shortcircuit=True,condition=all))
+
