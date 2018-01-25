@@ -20,7 +20,6 @@ requirements:
         - python
         - six
         - pyyaml
-        - nchash
 
 test:
     source_files:
