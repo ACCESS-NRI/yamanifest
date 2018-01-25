@@ -19,6 +19,8 @@ requirements:
     run:
         - python
         - six
+        - pyyaml
+        - nchash
 
 test:
     source_files:
@@ -28,7 +30,7 @@ test:
     requires:
         - pytest
     commands:
-        - py.test
+        - py.test -s
 
 about:
     home: https://github.com/aidanheerdegen/yamanifest
