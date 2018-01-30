@@ -77,6 +77,8 @@ def test_manifest_read_write():
     for filepath in files:
         mf1.add(os.path.join('test',filepath),['md5','sha1'])
 
+    assert(len(mf1) == len(files))
+
     mf1.dump()
 
     mf2 = mf.Manifest('mf1.yaml')

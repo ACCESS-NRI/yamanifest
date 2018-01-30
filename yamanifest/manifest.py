@@ -66,6 +66,12 @@ class Manifest(object):
         for file in self.data:
             yield file
 
+    def __len__(self):
+        """
+        Return the number of filepaths in the manifest object
+        """
+        return len(self.data)
+
     def load(self):
         """
         Load manifest from YAML file
