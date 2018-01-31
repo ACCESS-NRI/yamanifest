@@ -328,3 +328,25 @@ def test_shortcircuit_condition():
         # it returns true because the first hash it tested is true
         assert(mf8.check(shortcircuit=True,condition=all))
 
+
+def test_shortcircuit_add():
+
+    with cd(os.path.join('test','testfiles_copy')):
+
+        mf6 = mf.Manifest('mf6.yaml')
+
+        for filepath in glob.glob('*.bin') + glob.glob('*.nc'):
+            mf6.add(filepath,hashfn=['nchash','binhash'],shortcircuit=True)
+
+        mf6.dump()
+        assert(mf6.check())
+
+        # Should have no nchash for the bin files
+        for filepath in glob.glob('*.bin'):
+            assert(mf6.get(filepath,hashfn='nchash') == None)
+
+        # Should have no binhash for the netcdf files
+        for filepath in glob.glob('*.nc'):
+            assert(mf6.get(filepath,hashfn='binhash') == None)
+
+        print(mf6.data)

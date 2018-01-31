@@ -93,7 +93,7 @@ class Manifest(object):
         """
         del(self.data[filepath])
 
-    def add(self, filepath, hashfn=None, force=False):
+    def add(self, filepath, hashfn=None, force=False, shortcircuit=False):
         """
         Add hash value for a filepath given a hashing function (hashfn).
         If there is already a hash value only overwrite if force=True,
@@ -130,6 +130,9 @@ class Manifest(object):
 
                 # Set new value for this hash function
                 hashes[fn] = hashval
+
+                if shortcircuit:
+                    break
 
     def contains(self, filepath):
         """
