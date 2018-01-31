@@ -31,5 +31,5 @@ deploy:
     secure: "Q+iWh5IvEBKyeEy5xNghszSMHngpmY6sPJav18d0SGhTiHJCBvWXmbxM+41ILEPr+Gcqb6FmOFJ10reqvz2DbSEwArjjCO+fg7dOsyUYPlF0DZI2FbxUCaoi5VVP4DXNSiIGqeAe2+j4AnIyk2TJH/oe1uJDmkrDsr+ZchbA0OmNMZ04Ma1vt6jGvIxxfgDGKXI3PGvD3lYH7wsEaeTj5R5JHTXO7CcPN0aLy0Lw0OXKLcv4do4lkFDCqSzuJ3aM1xp1Iz3oNoXB6lLC2A5JnlblGqk61zeOY8Z3wpurOMvktL9pvUIURsbhGHoiA9X6e9QVw87tQBb+gN2gWTvVRQpKsV4GvtYpm4vtOhQydv/uJSZ+ZdS1epCDin9tXKMbjWW+VA+CpFyIaHqPYFt8lKoiMCVuFgfHidbh7tbXLCnYcVdBt4ZBKGGNGBwOz0c3aU0SLTgS6ipXQvoG00DXXI/D0jkKfWuVkXSdFrygy2+atuAV9V/hjV6KwS+1JziLvJaC1r9j8S9tBVBPXUyFqglFXUQ+TW/awOyNAxqd7QwpGGsjdcnmZnWyilWPa30Cw/qL/Ao3c2LdoXVFZiNsX1R+m3kMuIFj2vFUZ9IyclHQnBFzHu4q5UcNrQczPTqanL/f/CPnYta0TXBORIjKN+gNsP5Nz3OmqcPOP9iSl3k=" 
   on:
     tags: true
-    repo: aidanheerdegen/yamanifest
+    # repo: aidanheerdegen/yamanifest
   distributions: "sdist"
