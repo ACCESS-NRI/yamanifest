@@ -8,8 +8,8 @@ General YAML manifest format
   :target: https://readthedocs.org/projects/yamanifest/?badge=latest
 .. image:: https://travis-ci.org/aidanheerdegen/yamanifest.svg?branch=master
   :target: https://travis-ci.org/aidanheerdegen/yamanifest
-.. image:: https://circleci.com/gh/aidanheerdegen/yamanifest.svg?style=shield
-  :target: https://circleci.com/gh/aidanheerdegen/yamanifest
+.. image:: https://circleci.com/gh/coecms/yamanifest.svg?style=shield
+  :target: https://circleci.com/gh/coecms/yamanifest
 .. image:: http://codecov.io/github/aidanheerdegen/yamanifest/coverage.svg?branch=master
   :target: http://codecov.io/github/aidanheerdegen/yamanifest?branch=master
 .. image:: https://badge.fury.io/py/yamanifest.svg
