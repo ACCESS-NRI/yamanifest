@@ -22,6 +22,7 @@ from __future__ import print_function, absolute_import
 
 import os
 import yaml
+import copy
 from .hashing import hash, supported_hashes
 
 class HashExists(Exception):
@@ -100,15 +101,11 @@ class Manifest(object):
         otherwise raise exception.
         """
 
+        # Get dict of current hashes for filepath
         if filepath in self.data:
-            hashes = self.data[filepath]["hashes"]
+            hashes = copy.deepcopy(self.data[filepath]["hashes"])
         else:
-            self.data[filepath] = {}
-            self.data[filepath]["hashes"] = {}
-            hashes = self.data[filepath]["hashes"]
-
-        # Save the latest full system path 
-        self.data[filepath]['fullpath'] = os.path.realpath(filepath)
+            hashes = {}
 
         if hashfn is None:
             fns = self.hashes
@@ -118,10 +115,12 @@ class Manifest(object):
             else:
                 fns = hashfn
             
+        fullpath = os.path.realpath(filepath)
         for fn in fns:
-            hashval = hash(self.data[filepath]['fullpath'], fn)
+            hashval = hash(fullpath, fn)
             # If we've used an incompatible hashing function it will return
-            # None and we will silently discard this hash
+            # None and we will silently discard this hash, or if the filepath
+            # is unhashable
             if hashval is not None:
                 if fn in hashes:
                     if hashes[fn] != hashval:
@@ -133,6 +132,13 @@ class Manifest(object):
 
                 if shortcircuit:
                     break
+
+        # Only save data to manifest if a hash was successfully generated
+        if len(hashes) > 0:
+            if filepath not in self.data:
+                self.data[filepath] = {}
+            self.data[filepath]['fullpath'] = fullpath
+            self.data[filepath]["hashes"] = hashes
 
     def contains(self, filepath):
         """
