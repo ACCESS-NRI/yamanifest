@@ -40,36 +40,40 @@ def hash(path, hashfn, size=one_hundred_megabytes):
     TODO: make plugins that allow this transparently
     """
 
-    if hashfn == 'nchash':
-        hashval = ''
-        m = NCDataHash(path)
-        try:
-            hashval = m.gethash()
-        except NotNetcdfFileError as e:
-            sys.stderr.write(str(e))
-            hashval = None
-        return hashval
-    elif hashfn == 'binhash':
-        m = hashlib.new('md5')
-        with io.open(path, mode="rb") as fd:
-            # Size limited hashing, so prepend the filename, size and modification time 
-            hashstring = os.path.basename(path) + str(os.path.getsize(path)) + str(os.path.getmtime(path))
-            m.update(hashstring.encode())
-            tot = 0
-            for chunk in iter(lambda: fd.read(length), b''):
-                tot += len(chunk)
-                if tot >= size:
-                    rem = (size-tot)
-                    if rem <= 0:
-                        break
-                    chunk = chunk[:rem]
-                m.update(chunk)
-        return m.hexdigest()
-    else:
-        # from https://stackoverflow.com/a/40961519
-        m = hashlib.new(hashfn)
-        with io.open(path, mode="rb") as fd:
-            for chunk in iter(lambda: fd.read(length), b''):
-                m.update(chunk)
-        return m.hexdigest()
+    try:
+        if hashfn == 'nchash':
+            hashval = ''
+            m = NCDataHash(path)
+            try:
+                hashval = m.gethash()
+            except NotNetcdfFileError as e:
+                sys.stderr.write(str(e))
+                hashval = None
+            return hashval
+        elif hashfn == 'binhash':
+            m = hashlib.new('md5')
+            with io.open(path, mode="rb") as fd:
+                # Size limited hashing, so prepend the filename, size and modification time 
+                hashstring = os.path.basename(path) + str(os.path.getsize(path)) + str(os.path.getmtime(path))
+                m.update(hashstring.encode())
+                tot = 0
+                for chunk in iter(lambda: fd.read(length), b''):
+                    tot += len(chunk)
+                    if tot >= size:
+                        rem = (size-tot)
+                        if rem <= 0:
+                            break
+                        chunk = chunk[:rem]
+                    m.update(chunk)
+            return m.hexdigest()
+        else:
+            # from https://stackoverflow.com/a/40961519
+            m = hashlib.new(hashfn)
+            with io.open(path, mode="rb") as fd:
+                for chunk in iter(lambda: fd.read(length), b''):
+                    m.update(chunk)
+            return m.hexdigest()
+    except IOError as e:
+        sys.stderr.write('{}\nCannot hash, skipping {}\n'.format(str(e),path))
+        return None
 
