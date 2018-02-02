@@ -353,7 +353,7 @@ def test_shortcircuit_add():
 
 def test_malformed_file():
 
-    with cd(os.path.join('test','testfiles')):
+    with cd(os.path.join('test','testfiles_copy')):
 
         mf9 = mf.Manifest('mf9.yaml')
 
