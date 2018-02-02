@@ -350,3 +350,23 @@ def test_shortcircuit_add():
             assert(mf6.get(filepath,hashfn='binhash') == None)
 
         print(mf6.data)
+
+def test_malformed_file():
+
+    with cd(os.path.join('test','testfiles')):
+
+        mf9 = mf.Manifest('mf9.yaml')
+
+        for filepath in glob.glob('*.nc'):
+            mf9.add(filepath,['nchash','md5','sha1'])
+
+        # Intentionally alter the format string
+        mf9.header["format"] = 'bogus'
+        mf9.dump()
+
+        mf10 = mf.Manifest('mf9.yaml')
+        with pytest.raises(ValueError) as e:   
+            mf10.load()
+        print(str(e.value))
+        assert(str(e.value) == 'Not yamanifest format: bogus')
+

@@ -21,8 +21,10 @@ limitations under the License.
 from __future__ import print_function, absolute_import
 
 import os
+import sys
 import yaml
 import copy
+import subprocess
 from .hashing import hash, supported_hashes
 
 class HashExists(Exception):
@@ -58,7 +60,9 @@ class Manifest(object):
         else:
             self.hashes = hashes
         # self.lookup = {}
-        
+        # Meta data for the yamanifest file version. This is file type
+        # version, not library version.
+        self.header = { 'format':'yamanifest', 'version':1.0 }
             
     def __iter__(self):
         """
@@ -77,8 +81,17 @@ class Manifest(object):
         """
         Load manifest from YAML file
         """
-        with open(self.path, 'r') as file:
-            self.data = yaml.load(file)
+        try:
+            with open(self.path, 'r') as file:
+                self.header, self.data = yaml.load_all(file)
+            if "format" not in self.header:
+                raise ValueError('Not yamanifest format')
+            if self.header["format"] != 'yamanifest':
+                raise ValueError('Not yamanifest format: {}'.format(self.header["format"]))
+        except Exception as e:
+            sys.stderr.write('Error parsing yamanifest file: {} :: {}\n'.format(self.path,str(e)))
+            raise
+            
         # self._make_lookup()
         
     def dump(self):
@@ -86,7 +99,7 @@ class Manifest(object):
         Dump manifest from YAML file
         """
         with open(self.path, 'w') as file:
-            file.write(yaml.dump(self.data, default_flow_style=False))
+            file.write(yaml.dump_all([self.header, self.data], default_flow_style=False))
 
     def delete(self, filepath):
         """

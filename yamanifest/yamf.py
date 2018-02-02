@@ -65,6 +65,11 @@ def main(args):
 
     elif args.command == 'check':
         hashvals = {}
+        try:
+            mf1.load()
+        except:
+            sys.exit(1)
+
         if args.any:
             condition = any
         else:
