@@ -93,6 +93,9 @@ class Manifest(object):
             raise
             
         # self._make_lookup()
+
+        # Allow chaining a load to creating a new instance
+        return self
         
     def dump(self):
         """

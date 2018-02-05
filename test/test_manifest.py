@@ -87,6 +87,11 @@ def test_manifest_read_write():
 
     assert(mf1.equals(mf2) == True)
 
+    # Test chained load
+    mf2 = mf.Manifest('mf1.yaml').load()
+
+    assert(mf1.equals(mf2) == True)
+
 def test_has_hash():
 
     mf1 = mf.Manifest('mf1.yaml')
@@ -369,4 +374,3 @@ def test_malformed_file():
             mf10.load()
         print(str(e.value))
         assert(str(e.value) == 'Not yamanifest format: bogus')
-
