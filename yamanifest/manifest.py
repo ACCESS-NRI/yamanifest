@@ -226,7 +226,7 @@ class Manifest(object):
                 if hashvals is not None:
                     hashvals[fn] = None
             else:
-                hashval = hash(filepath, fn)
+                hashval = hash(self.data[filepath]["fullpath"], fn)
                 # Save these values if given list in which to return them
                 if hashvals is not None:
                     hashvals[fn] = hashval
