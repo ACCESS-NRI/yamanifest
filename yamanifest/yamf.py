@@ -79,7 +79,7 @@ def main(args):
             return True
         else:
             for filepath in hashvals:
-                print("{} :: hashes do not match for {}! {} {}".format(args.name,filepath,hashvals[filepath],mf1.data[filepath]["hashes"]))
+                print("{} :: hashes do not match for {}: {} {}".format(args.name,filepath,hashvals[filepath],mf1.data[filepath]["hashes"]))
             sys.exit(1)
 
 

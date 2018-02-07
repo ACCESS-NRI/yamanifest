@@ -184,7 +184,7 @@ class Manifest(object):
 
         return hashval
         
-    def check_file(self, filepath, hashfn=None, hashvals=None, shortcircuit=False, condition=all):
+    def check_file(self, filepaths, hashfn=None, hashvals=None, shortcircuit=False, condition=all):
         """
         Check hash value for a filepath given a hashing function (hashfn)
         matches stored hash value. Return values of non-matching hashes in
@@ -192,22 +192,10 @@ class Manifest(object):
         or False result with first True/False result
         """
 
-        fns = []
+        if type(filepaths) is str:
+            filepaths = [ filepaths ]
 
-        if self.contains(filepath):
-            hashes = self.data[filepath]["hashes"]
-        else:
-            raise FilePathNonexistent('{} does not exist in manifest'.format(filepath))
-
-        if hashfn == None:
-            if self.hashes is not None:
-                fns = self.hashes
-            else:
-                fns = hashes.keys()
-        elif type(hashfn) is str:
-            fns = [hashfn,]
-        else:
-            fns = hashfn
+        status = []
 
         if hashvals is not None:
             if type(hashvals) is dict:
@@ -216,28 +204,52 @@ class Manifest(object):
                 print("yamanifest :: manifest :: check_items :: hashvals must be a dict")
                 raise
             
-        status = []
+        for filepath in filepaths:
 
-        for fn in fns:
-            # Ignore hash test if it does not exist in the manifest. Need this behaviour
-            # so we can cascade hashes which in some cases are incompatible with certains
-            # file types, e.g. nchash
-            if fn not in hashes:
-                if hashvals is not None:
-                    hashvals[fn] = None
+            fns = []
+
+            if self.contains(filepath):
+                hashes = self.data[filepath]["hashes"]
             else:
-                hashval = hash(self.data[filepath]["fullpath"], fn)
-                # Save these values if given list in which to return them
-                if hashvals is not None:
-                    hashvals[fn] = hashval
-                if hashval != hashes[fn]:
-                    if shortcircuit:
-                        return False
-                    status.append(False)
+                raise FilePathNonexistent('{} does not exist in manifest'.format(filepath))
+            
+            if hashfn == None:
+                if self.hashes is not None:
+                    fns = self.hashes
                 else:
-                    if shortcircuit:
-                        return True
-                    status.append(True)
+                    fns = hashes.keys()
+            elif type(hashfn) is str:
+                fns = [hashfn,]
+            else:
+                fns = hashfn
+                
+            filestatus = []
+
+            for fn in fns:
+                # Ignore hash test if it does not exist in the manifest. Need this behaviour
+                # so we can cascade hashes which in some cases are incompatible with certains
+                # file types, e.g. nchash
+                if fn not in hashes:
+                    if hashvals is not None:
+                        hashvals[fn] = None
+                else:
+                    hashval = hash(self.data[filepath]["fullpath"], fn)
+                    # Save these values if given list in which to return them
+                    if hashvals is not None:
+                        hashvals[fn] = hashval
+                    if hashval != hashes[fn]:
+                        filestatus.append(False)
+                        if shortcircuit:
+                            break
+                    else:
+                        filestatus.append(True)
+                        if shortcircuit:
+                            break
+
+            # Only return True for a filepath if there was at least one
+            # True hash. Ensures filepaths with no hash are False and must
+            # be regenerated
+            status.append(condition(filestatus) and len(filestatus)>0)
 
         return condition(status)
 
@@ -254,18 +266,8 @@ class Manifest(object):
                 print("yamanifest :: manifest :: check_items :: hashvals must be a dict")
                 raise
             
-        for filepath in self:
-
-            if hashvals is not None:
-                tmphashvals = {}
-            else:
-                tmphashvals = None
-
-            if not self.check_file(filepath=filepath,hashvals=tmphashvals,**args):
-                if hashvals is not None:
-                    # Save hashes which do not match
-                    hashvals[filepath] = tmphashvals
-                return False
+        if not self.check_file(filepaths=self.data.keys(),hashvals=hashvals,**args):
+            return False
 
         return True
 
