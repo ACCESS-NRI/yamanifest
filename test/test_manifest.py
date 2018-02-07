@@ -322,7 +322,6 @@ def test_shortcircuit_condition():
         # nchash should not be true. This behaviour has changed.
         # Decided an entry with no hash defined should be false to
         # trigger actions to create a new hash
-        # pdb.set_trace()
         assert(not mf8.check(hashfn='nchash'))
         # binhash should not be true (set to incorrect value above)
         assert(not mf8.check(hashfn='binhash'))
@@ -335,7 +334,10 @@ def test_shortcircuit_condition():
         # These options are essentially contradictory. shortcircuit
         # will in effect override the condition option. In this case
         # it returns true because the first hash it tested is true
-        assert(mf8.check(shortcircuit=True,condition=all))
+        # Removed test as it is essentially non-deterministic about
+        # which hash it encounters first. Was true for python3, false
+        # for python27
+        # assert(mf8.check(shortcircuit=True,condition=all))
 
 
 def test_shortcircuit_add():
