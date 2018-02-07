@@ -26,6 +26,8 @@ import yaml
 import copy
 import subprocess
 from .hashing import hash, supported_hashes
+import multiprocessing as mp
+from collections import defaultdict
 
 class HashExists(Exception):
     """Trying to add a hashed value when one already exists"""
@@ -63,6 +65,8 @@ class Manifest(object):
         # Meta data for the yamanifest file version. This is file type
         # version, not library version.
         self.header = { 'format':'yamanifest', 'version':1.0 }
+
+        self.numproc = 8
             
     def __iter__(self):
         """
@@ -192,6 +196,8 @@ class Manifest(object):
         or False result with first True/False result
         """
 
+        pool = mp.Pool(processes=self.numproc) #,maxtasksperchild=50)
+
         if type(filepaths) is str:
             filepaths = [ filepaths ]
 
@@ -199,11 +205,13 @@ class Manifest(object):
 
         if hashvals is not None:
             if type(hashvals) is dict:
-                hashvals.clear()
+                hashvals = defaultdict(defaultdict)
             else:
                 print("yamanifest :: manifest :: check_items :: hashvals must be a dict")
                 raise
             
+        results = defaultdict(defaultdict)
+
         for filepath in filepaths:
 
             fns = []
@@ -223,33 +231,49 @@ class Manifest(object):
             else:
                 fns = hashfn
                 
-            filestatus = []
-
             for fn in fns:
                 # Ignore hash test if it does not exist in the manifest. Need this behaviour
-                # so we can cascade hashes which in some cases are incompatible with certains
+                # so we can cascade hashes which in some cases are incompatible with certain
                 # file types, e.g. nchash
                 if fn not in hashes:
                     if hashvals is not None:
                         hashvals[fn] = None
                 else:
-                    hashval = hash(self.data[filepath]["fullpath"], fn)
-                    # Save these values if given list in which to return them
-                    if hashvals is not None:
-                        hashvals[fn] = hashval
-                    if hashval != hashes[fn]:
-                        filestatus.append(False)
-                        if shortcircuit:
-                            break
-                    else:
-                        filestatus.append(True)
-                        if shortcircuit:
-                            break
+                    results[filepath][fn] = pool.apply_async(hash, args=(self.data[filepath]["fullpath"], fn))
 
-            # Only return True for a filepath if there was at least one
-            # True hash. Ensures filepaths with no hash are False and must
-            # be regenerated
-            status.append(condition(filestatus) and len(filestatus)>0)
+        pool.close()
+        pool.join()
+
+        for filepath in filepaths:
+
+            if filepath in results:
+                filestatus = []
+
+                for fn in results[filepath]:
+                    if fn in self.data[filepath]["hashes"]:
+                        hashval = results[filepath][fn].get()
+                        # Save these values if given list in which to return them
+                        if hashvals is not None:
+                            hashvals[filepath][fn] = hashval
+                        if hashval == self.data[filepath]["hashes"][fn]:
+                            filestatus.append(True)
+                            if shortcircuit:
+                                break
+                            else:
+                                continue
+
+                    # Should only get here if fn does not exist in manifest, or differs in value
+                    filestatus.append(False)
+                    if shortcircuit:
+                        break
+
+                # Only return True for a filepath if there was at least one
+                # True hash. Ensures filepaths with no hash are False and must
+                # be regenerated
+                status.append(condition(filestatus) and len(filestatus)>0)
+            else:
+                # Fall here when hash specified but was not in manifest
+                status.append(False)
 
         return condition(status)
 
