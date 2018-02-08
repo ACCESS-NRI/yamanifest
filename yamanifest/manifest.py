@@ -290,10 +290,7 @@ class Manifest(object):
                 print("yamanifest :: manifest :: check_items :: hashvals must be a dict")
                 raise
             
-        if not self.check_file(filepaths=self.data.keys(),hashvals=hashvals,**args):
-            return False
-
-        return True
+        return self.check_file(filepaths=self.data.keys(),hashvals=hashvals,**args)
 
     def fullpath(self, filepath):
         """
