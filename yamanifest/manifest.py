@@ -191,7 +191,7 @@ class Manifest(object):
     def check_file(self, filepaths, hashfn=None, hashvals=None, shortcircuit=False, condition=all):
         """
         Check hash value for a filepath given a hashing function (hashfn)
-        matches stored hash value. Return values of non-matching hashes in
+        matches stored hash value. Return values of non-matching hashes
         if hashvals dict supplied. If shortcircuit is True, will return True
         or False result with first True/False result
         """
@@ -205,12 +205,12 @@ class Manifest(object):
 
         if hashvals is not None:
             if type(hashvals) is dict:
-                hashvals = defaultdict(defaultdict)
+                tmphashvals = defaultdict(dict)
             else:
                 print("yamanifest :: manifest :: check_items :: hashvals must be a dict")
                 raise
             
-        results = defaultdict(defaultdict)
+        results = defaultdict(dict)
 
         for filepath in filepaths:
 
@@ -235,10 +235,7 @@ class Manifest(object):
                 # Ignore hash test if it does not exist in the manifest. Need this behaviour
                 # so we can cascade hashes which in some cases are incompatible with certain
                 # file types, e.g. nchash
-                if fn not in hashes:
-                    if hashvals is not None:
-                        hashvals[fn] = None
-                else:
+                if fn in hashes:
                     results[filepath][fn] = pool.apply_async(hash, args=(self.data[filepath]["fullpath"], fn))
 
         pool.close()
@@ -251,19 +248,22 @@ class Manifest(object):
 
                 for fn in results[filepath]:
                     if fn in self.data[filepath]["hashes"]:
+                        # Get result of multiprocessing step
                         hashval = results[filepath][fn].get()
-                        # Save these values if given list in which to return them
-                        if hashvals is not None:
-                            hashvals[filepath][fn] = hashval
                         if hashval == self.data[filepath]["hashes"][fn]:
                             filestatus.append(True)
                             if shortcircuit:
                                 break
                             else:
                                 continue
+                        else:
+                            # Save these values if given list in which to return them
+                            if hashvals is not None:
+                                tmphashvals[filepath][fn] = hashval
 
                     # Should only get here if fn does not exist in manifest, or differs in value
                     filestatus.append(False)
+
                     if shortcircuit:
                         break
 
@@ -274,6 +274,9 @@ class Manifest(object):
             else:
                 # Fall here when hash specified but was not in manifest
                 status.append(False)
+
+        if hashvals is not None:
+            hashvals.update(tmphashvals)
 
         return condition(status)
 
