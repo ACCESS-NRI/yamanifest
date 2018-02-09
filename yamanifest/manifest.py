@@ -114,51 +114,61 @@ class Manifest(object):
         """
         del(self.data[filepath])
 
-    def add(self, filepath, hashfn=None, force=False, shortcircuit=False):
+    def add(self, filepaths=None, hashfn=None, force=False, shortcircuit=False):
         """
-        Add hash value for a filepath given a hashing function (hashfn).
+        Add hash value for filepath given a hashing function (hashfn).
+        If no filepaths defined, default to all current filepaths, and in
+        this way can add a hash to all existing filepaths.
         If there is already a hash value only overwrite if force=True,
         otherwise raise exception.
         """
 
-        # Get dict of current hashes for filepath
-        if filepath in self.data:
-            hashes = copy.deepcopy(self.data[filepath]["hashes"])
+        if filepaths is None:
+            filepaths = self.data.keys()
         else:
-            hashes = {}
+            if type(filepaths) is str:
+                filepaths = [filepaths,]
 
-        if hashfn is None:
-            fns = self.hashes
-        else:
-            if type(hashfn) is str:
-                fns = [hashfn,]
-            else:
-                fns = hashfn
+        for filepath in filepaths:
             
-        fullpath = os.path.realpath(filepath)
-        for fn in fns:
-            hashval = hash(fullpath, fn)
-            # If we've used an incompatible hashing function it will return
-            # None and we will silently discard this hash, or if the filepath
-            # is unhashable
-            if hashval is not None:
-                if fn in hashes:
-                    if hashes[fn] != hashval:
-                        if not force:
-                            raise HashExists('Tried to add {} to {}'.format(fn,filepath))
+            # Get dict of current hashes for filepath
+            if filepath in self.data:
+                hashes = copy.deepcopy(self.data[filepath]["hashes"])
+            else:
+                hashes = {}
+                
+            if hashfn is None:
+                fns = self.hashes
+            else:
+                if type(hashfn) is str:
+                    fns = [hashfn,]
+                else:
+                    fns = hashfn
 
-                # Set new value for this hash function
-                hashes[fn] = hashval
+            fullpath = os.path.realpath(filepath)
+            for fn in fns:
+                hashval = hash(fullpath, fn)
+                # If we've used an incompatible hashing function it will return
+                # None and we will silently discard this hash, or if the filepath
+                # is unhashable
+                if hashval is not None:
+                    if fn in hashes:
+                        if hashes[fn] != hashval:
+                            if not force:
+                                raise HashExists('Tried to add {} to {}'.format(fn,filepath))
+                            
+                    # Set new value for this hash function
+                    hashes[fn] = hashval
 
-                if shortcircuit:
-                    break
+                    if shortcircuit:
+                        break
 
-        # Only save data to manifest if a hash was successfully generated
-        if len(hashes) > 0:
-            if filepath not in self.data:
-                self.data[filepath] = {}
-            self.data[filepath]['fullpath'] = fullpath
-            self.data[filepath]["hashes"] = hashes
+            # Only save data to manifest if a hash was successfully generated
+            if len(hashes) > 0:
+                if filepath not in self.data:
+                    self.data[filepath] = {}
+                self.data[filepath]['fullpath'] = fullpath
+                self.data[filepath]["hashes"] = hashes
 
     def contains(self, filepath):
         """

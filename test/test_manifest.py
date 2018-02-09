@@ -128,6 +128,15 @@ def test_manifest_netcdf():
     # Equal when paths ignored
     assert(mf1.equals(mf2,paths=False) == True)
 
+    # Test with array of filepaths
+    with cd(os.path.join('test','testfiles_copy')):
+
+        mf1 = mf.Manifest('mf1.yaml')
+        
+        mf1.add(glob.glob('*.nc'),['nchash','md5','sha1'])
+
+    assert(mf1.equals(mf2))
+
 def test_manifest_netcdf_changed_time():
 
     with cd(os.path.join('test','testfiles_copy')):
