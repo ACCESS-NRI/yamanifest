@@ -78,8 +78,11 @@ def main(args):
             print("{} :: hashes are correct".format(args.name))
             return True
         else:
+            print("{} :: hashes are incorrect".format(args.name))
+            print(hashvals)
             for filepath in hashvals:
-                print("{} :: hashes do not match for {}: {} {}".format(args.name,filepath,hashvals[filepath],mf1.data[filepath]["hashes"]))
+                for fn in hashvals[filepath]:
+                    print("hashes do not match for {}: fn: {}\n  new {} file {}".format(filepath,fn,hashvals[filepath][fn],mf1.data[filepath]["hashes"][fn]))
             sys.exit(1)
 
 
