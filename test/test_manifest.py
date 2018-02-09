@@ -133,7 +133,8 @@ def test_manifest_netcdf():
 
         mf1 = mf.Manifest('mf1.yaml')
         
-        mf1.add(glob.glob('*.nc'),['nchash','md5','sha1'])
+        mf1.add(glob.glob('*.nc'),['nchash'])
+        mf1.add(hashfn=['md5','sha1'])
 
     assert(mf1.equals(mf2))
 
