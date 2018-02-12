@@ -25,8 +25,6 @@ import fnmatch
 import functools
 import itertools
 
-from yamanifest
-
 # https://stackoverflow.com/a/25413436
 def find_files(dir_path=None, patterns=None):
     """
