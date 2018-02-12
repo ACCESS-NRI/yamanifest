@@ -392,3 +392,43 @@ def test_malformed_file():
             mf10.load()
         print(str(e.value))
         assert(str(e.value) == 'Not yamanifest format: bogus')
+
+
+def test_update():
+
+    mf1 = mf.Manifest('mf1.yaml')
+
+    files = ['file1','file2']
+
+    for filepath in files:
+        mf1.add(os.path.join('test',filepath),['md5','sha1'])
+
+    assert(len(mf1) == len(files))
+
+    mf1.dump()
+
+    mf2 = mf.Manifest('mf2.yaml')
+        
+    with cd('test'):
+
+        mf2 = mf.Manifest('mf2.yaml')
+
+        for filepath in files:
+            mf2.add(filepath,['md5','sha1'])
+
+    # Make a new manifest, populate it with files from mf1, but
+    # change path so it should resemble mf2
+    mf3 = mf.Manifest('mf3.yaml')
+    mf3.update(mf1,newpath=".")
+
+    assert(mf3.equals(mf2))
+
+    # As above but in reverse, add a newpath to mf2 so that it
+    # should equal mf1
+    mf4 = mf.Manifest('mf4.yaml')
+    mf4.update(mf2,newpath="test")
+
+    print(mf4.data)
+    print(mf1.data)
+        
+    assert(mf4.equals(mf1))

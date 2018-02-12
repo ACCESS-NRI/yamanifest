@@ -373,12 +373,29 @@ class Manifest(object):
         hashval = self.data[filepath]["hashes"][hashfn]
         self.lookup[(hashfn,hashval)] = filepath
 
+    def update(self, other, newpath=None):
+        """
+        Add one manifest to another. Optionally replace path in fullpath with new path
+        """
+        mftmp = {}
+        if newpath is not None:
+            # Make a copy so we don't alter other
+            mftmp = copy.deepcopy(other)
+            # Cannot safely iterate over keys as the dict is being changed so iterate
+            # over a precomputed list
+            for filepath in list(other.data.keys()):
+                mftmp.data[os.path.normpath(os.path.join(newpath,os.path.basename(filepath)))] = other.data[filepath]
+                del mftmp.data[filepath]
+        else:
+            mftmp = other
+
+        self.data.update(mftmp.data)
+
     def update_matching_hashes(self, other):
         """
         Update (add) hashes from other manifest where a match exists between a common
         hash
         """
-
         for filepath in self:
             for hashfn in self.data[filepath]["hashes"]:
                 hashval = self.data[filepath]["hashes"][hashfn]
