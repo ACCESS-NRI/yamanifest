@@ -210,10 +210,12 @@ def test_manifest_find():
 
         mf2 = mf.Manifest('mf2.yaml')
 
+        # Make a manifest only with nchash
         for filepath in glob.glob('*.nc'):
             mf1.add(filepath,['nchash'])
 
-        mf2.update(mf1)
+        # Update with hashes from mf1
+        mf2.update_matching_hashes(mf1)
 
         assert(mf2.equals(mf1))
 
@@ -224,7 +226,7 @@ def test_manifest_find():
     for filepath in glob.glob(os.path.join('test','testfiles','*.nc')):
         mf3.add(filepath,['nchash'])
 
-    mf3.update(mf1)
+    mf3.update_matching_hashes(mf1)
 
     # Manifests should not be equal, their filepaths differ
     assert(not mf3.equals(mf1))

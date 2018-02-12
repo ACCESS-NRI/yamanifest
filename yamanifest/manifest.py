@@ -147,6 +147,9 @@ class Manifest(object):
 
             fullpath = os.path.realpath(filepath)
             for fn in fns:
+                if fn in hashes and not force:
+                    # Don't try and add a hash if it already exists
+                    continue
                 hashval = hash(fullpath, fn)
                 # If we've used an incompatible hashing function it will return
                 # None and we will silently discard this hash, or if the filepath
@@ -163,7 +166,8 @@ class Manifest(object):
                     if shortcircuit:
                         break
 
-            # Only save data to manifest if a hash was successfully generated
+            # Only save data to manifest if a hash was successfully generated or
+            # there were existing hashes
             if len(hashes) > 0:
                 if filepath not in self.data:
                     self.data[filepath] = {}
@@ -369,9 +373,10 @@ class Manifest(object):
         hashval = self.data[filepath]["hashes"][hashfn]
         self.lookup[(hashfn,hashval)] = filepath
 
-    def update(self, other):
+    def update_matching_hashes(self, other):
         """
-        Update (add) hashes from other manifest where matches exist some hashes
+        Update (add) hashes from other manifest where a match exists between a common
+        hash
         """
 
         for filepath in self:
@@ -383,3 +388,19 @@ class Manifest(object):
                     self.data[filepath]["hashes"].update(other.data[newfilepath]["hashes"])
                     break
 
+    @classmethod
+    def find_manifest(cls, dirpath):
+        """
+        Search a directory path and find first manifest file, return Manifest object else None 
+        """
+        for file in find_files(dirpath, ["*.yml","*.yaml"]):
+            try:
+                mftmp = cls(file) 
+                mftmp.load()
+            except:
+                pass
+            finally:
+                if len(mftmp) > 0:
+                    return mftmp
+
+        return None
