@@ -56,6 +56,11 @@ class Manifest(object):
         """
         self.path = path
         self.data = {}
+        self.header = {}
+        try:
+            self.numproc = mp.cpu_count()
+        except NotImplementedError:
+            self.numproc = 1
         for key, val in kwargs.items():
             setattr(self, key, val)
         self.iter = 0
@@ -65,10 +70,10 @@ class Manifest(object):
             self.hashes = hashes
         # self.lookup = {}
         # Meta data for the yamanifest file version. This is file type
-        # version, not library version.
-        self.header = { 'format':'yamanifest', 'version':1.0 }
+        # version, not library version. Use update in case extra meta
+        # data was defined in arguments
+        self.header.update({ 'format':'yamanifest', 'version':1.0 })
 
-        self.numproc = 8
             
     def __iter__(self):
         """
