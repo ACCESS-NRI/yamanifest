@@ -20,6 +20,8 @@ limitations under the License.
 
 from __future__ import print_function, absolute_import
 
+from six.moves import zip
+
 import os
 import sys
 import yaml
@@ -53,7 +55,7 @@ class Manifest(object):
         order of hashes to use when checking manifest validity
         """
         self.path = path
-        self.data = { }
+        self.data = {}
         for key, val in kwargs.items():
             setattr(self, key, val)
         self.iter = 0
@@ -129,14 +131,20 @@ class Manifest(object):
             if type(filepaths) is str:
                 filepaths = [filepaths,]
 
+        tmpfilepaths = []
+        tmpfns = []
+
+        results = defaultdict(dict)
+
         for filepath in filepaths:
             
-            # Get dict of current hashes for filepath
-            if filepath in self.data:
-                hashes = copy.deepcopy(self.data[filepath]["hashes"])
-            else:
-                hashes = {}
-                
+            fullpath = os.path.realpath(filepath)
+
+            if filepath not in self.data:
+                self.data[filepath] = {}
+            self.data[filepath]['fullpath'] = fullpath
+
+            hashes = {}
             if hashfn is None:
                 fns = self.hashes
             else:
@@ -145,12 +153,26 @@ class Manifest(object):
                 else:
                     fns = hashfn
 
-            fullpath = os.path.realpath(filepath)
             for fn in fns:
                 if fn in hashes and not force:
                     # Don't try and add a hash if it already exists
                     continue
-                hashval = hash(fullpath, fn)
+                tmpfilepaths.append(filepath)
+                tmpfns.append(fn)
+        
+        results = self.calc_hashes(tmpfilepaths, tmpfns)
+                
+        for filepath in results:
+
+            # Get dict of current hashes for filepath
+            hashes = {}
+            if "hashes" in self.data[filepath]:
+                hashes = copy.deepcopy(self.data[filepath]["hashes"])
+                
+            for fn in results[filepath]:
+
+                hashval = results[filepath][fn]
+                
                 # If we've used an incompatible hashing function it will return
                 # None and we will silently discard this hash, or if the filepath
                 # is unhashable
@@ -158,7 +180,7 @@ class Manifest(object):
                     if fn in hashes:
                         if hashes[fn] != hashval:
                             if not force:
-                                raise HashExists('Tried to add {} to {}'.format(fn,filepath))
+                                continue
                             
                     # Set new value for this hash function
                     hashes[fn] = hashval
@@ -167,12 +189,11 @@ class Manifest(object):
                         break
 
             # Only save data to manifest if a hash was successfully generated or
-            # there were existing hashes
+            # there were existing hashes, else delete it
             if len(hashes) > 0:
-                if filepath not in self.data:
-                    self.data[filepath] = {}
-                self.data[filepath]['fullpath'] = fullpath
                 self.data[filepath]["hashes"] = hashes
+            else:
+                del(self.data[filepath])
 
     def contains(self, filepath):
         """
@@ -202,6 +223,31 @@ class Manifest(object):
 
         return hashval
         
+    def calc_hashes(self, filepaths, hashfns):
+        """
+        Calculate hash values for a number of filepaths and hash function combinations
+        """
+        
+        # print("Spawning pool")
+        pool = mp.Pool(processes=self.numproc) #,maxtasksperchild=50)
+
+        results = defaultdict(dict)
+
+        # print("Queuing jobs")
+        for filepath, fn in zip(filepaths,hashfns):
+            results[filepath][fn] = pool.apply_async(hash, args=(self.data[filepath]["fullpath"], fn))
+
+        pool.close()
+        pool.join()
+
+        # print("Retrieving results")
+        for filepath, fn in zip(filepaths,hashfns):
+            # Get result of multiprocessing step. Be careful altering this
+            # loop, as this is saving the result back to the dictionary
+            results[filepath][fn] = results[filepath][fn].get()
+
+        return results
+
     def check_file(self, filepaths, hashfn=None, hashvals=None, shortcircuit=False, condition=all):
         """
         Check hash value for a filepath given a hashing function (hashfn)
@@ -209,8 +255,6 @@ class Manifest(object):
         if hashvals dict supplied. If shortcircuit is True, will return True
         or False result with first True/False result
         """
-
-        pool = mp.Pool(processes=self.numproc) #,maxtasksperchild=50)
 
         if type(filepaths) is str:
             filepaths = [ filepaths ]
@@ -225,6 +269,9 @@ class Manifest(object):
                 raise
             
         results = defaultdict(dict)
+
+        tmpfilepaths = []
+        tmpfns = []
 
         for filepath in filepaths:
 
@@ -250,10 +297,10 @@ class Manifest(object):
                 # so we can cascade hashes which in some cases are incompatible with certain
                 # file types, e.g. nchash
                 if fn in hashes:
-                    results[filepath][fn] = pool.apply_async(hash, args=(self.data[filepath]["fullpath"], fn))
+                    tmpfilepaths.append(filepath)
+                    tmpfns.append(fn)
 
-        pool.close()
-        pool.join()
+        results = self.calc_hashes(tmpfilepaths, tmpfns)
 
         for filepath in filepaths:
 
@@ -263,7 +310,7 @@ class Manifest(object):
                 for fn in results[filepath]:
                     if fn in self.data[filepath]["hashes"]:
                         # Get result of multiprocessing step
-                        hashval = results[filepath][fn].get()
+                        hashval = results[filepath][fn]
                         if hashval == self.data[filepath]["hashes"][fn]:
                             filestatus.append(True)
                             if shortcircuit:

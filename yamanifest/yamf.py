@@ -59,8 +59,7 @@ def main(args):
             # If manifest exists load existing hash data unless --force
             if not args.force:
                 mf1.load()
-        for filepath in args.files:
-            mf1.add(filepath,hashfn=args.hashes,force=args.force)
+        mf1.add(args.files,hashfn=args.hashes,force=args.force)
         mf1.dump()
 
     elif args.command == 'check':
