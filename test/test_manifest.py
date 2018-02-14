@@ -67,7 +67,10 @@ def setup_module(module):
 def teardown_module(module):
     if verbose: print ("teardown_module   module:%s" % module.__name__)
     shutil.rmtree(os.path.join('test','testfiles_copy'),ignore_errors=True)
-    os.remove(os.path.join('test','testfiles','mf1.yaml'))
+    try:
+        os.remove(os.path.join('test','testfiles','mf1.yaml'))
+    except:
+        pass
 
 def test_manifest_read_write():
 
@@ -368,11 +371,12 @@ def test_shortcircuit_add():
         for filepath in glob.glob('*.bin'):
             assert(mf6.get(filepath,hashfn='nchash') == None)
 
+        print(mf6.data)
+        pdb.set_trace()
+
         # Should have no binhash for the netcdf files
         for filepath in glob.glob('*.nc'):
             assert(mf6.get(filepath,hashfn='binhash') == None)
-
-        print(mf6.data)
 
 def test_malformed_file():
 

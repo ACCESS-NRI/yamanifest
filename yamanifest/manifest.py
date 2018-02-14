@@ -27,9 +27,11 @@ import sys
 import yaml
 import copy
 import subprocess
-from .hashing import hash, supported_hashes
 import multiprocessing as mp
 from collections import defaultdict
+
+from .hashing import hash, supported_hashes
+from yamanifest.utils import find_files
 
 class HashExists(Exception):
     """Trying to add a hashed value when one already exists"""
@@ -146,10 +148,12 @@ class Manifest(object):
             fullpath = os.path.realpath(filepath)
 
             if filepath not in self.data:
+                # These must be defined so that queries do not fail later
                 self.data[filepath] = {}
+                self.data[filepath]["hashes"] = {}
+
             self.data[filepath]['fullpath'] = fullpath
 
-            hashes = {}
             if hashfn is None:
                 fns = self.hashes
             else:
@@ -159,7 +163,7 @@ class Manifest(object):
                     fns = hashfn
 
             for fn in fns:
-                if fn in hashes and not force:
+                if fn in self.data[filepath]["hashes"] and not force:
                     # Don't try and add a hash if it already exists
                     continue
                 tmpfilepaths.append(filepath)
@@ -174,7 +178,19 @@ class Manifest(object):
             if "hashes" in self.data[filepath]:
                 hashes = copy.deepcopy(self.data[filepath]["hashes"])
                 
-            for fn in results[filepath]:
+            fns = []
+            if hashfn is None:
+                fns = self.hashes
+            else:
+                if type(hashfn) is str:
+                    fns = [hashfn,]
+                else:
+                    fns = hashfn
+
+            for fn in fns:
+
+                # if fn not in results[filepath]:
+                #     continue
 
                 hashval = results[filepath][fn]
                 
