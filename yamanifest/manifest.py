@@ -67,9 +67,9 @@ class Manifest(object):
             setattr(self, key, val)
         self.iter = 0
         if hashes is None:
-            self.hashes = ['nchash','binhash','md5']
+            self.hashes = set(['binhash','md5'])
         else:
-            self.hashes = hashes
+            self.hashes = set(hashes)
         # self.lookup = {}
         # Meta data for the yamanifest file version. This is file type
         # version, not library version. Use update in case extra meta
@@ -123,7 +123,7 @@ class Manifest(object):
         """
         del(self.data[filepath])
 
-    def add(self, filepaths=None, hashfn=None, force=False, shortcircuit=False):
+    def add(self, filepaths=None, hashfn=None, force=False, shortcircuit=False, fullpath=None):
         """
         Add hash value for filepath given a hashing function (hashfn).
         If no filepaths defined, default to all current filepaths, and in
@@ -145,14 +145,14 @@ class Manifest(object):
 
         for filepath in filepaths:
             
-            fullpath = os.path.realpath(filepath)
-
             if filepath not in self.data:
                 # These must be defined so that queries do not fail later
                 self.data[filepath] = {}
                 self.data[filepath]["hashes"] = {}
-
-            self.data[filepath]['fullpath'] = fullpath
+                if fullpath is None:
+                    self.data[filepath]['fullpath'] = os.path.realpath(filepath)
+                else:
+                    self.data[filepath]['fullpath'] = fullpath
 
             if hashfn is None:
                 fns = self.hashes
@@ -161,6 +161,9 @@ class Manifest(object):
                     fns = [hashfn,]
                 else:
                     fns = hashfn
+                # Need to add any hash function we use to the list of default hashes
+                for fn in fns:
+                    self.hashes.add(fn)
 
             for fn in fns:
                 if fn in self.data[filepath]["hashes"] and not force:

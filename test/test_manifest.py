@@ -365,14 +365,14 @@ def test_shortcircuit_add():
             mf6.add(filepath,hashfn=['nchash','binhash'],shortcircuit=True)
 
         mf6.dump()
+        # print("mf6: ",mf6.data)
+        # pdb.set_trace()
+
         assert(mf6.check())
 
         # Should have no nchash for the bin files
         for filepath in glob.glob('*.bin'):
             assert(mf6.get(filepath,hashfn='nchash') == None)
-
-        print(mf6.data)
-        pdb.set_trace()
 
         # Should have no binhash for the netcdf files
         for filepath in glob.glob('*.nc'):
@@ -436,3 +436,26 @@ def test_update():
     print(mf1.data)
         
     assert(mf4.equals(mf1))
+
+def test_specify_fullpath():
+
+    mf1 = mf.Manifest('mf1.yaml')
+
+    files = ['file1','file2']
+
+    # Specify a fullpath that is the same as the filepath
+    for filepath in files:
+        mf1.add(os.path.join('test',filepath),['md5'],fullpath=os.path.join('test',filepath))
+
+    assert(len(mf1) == len(files))
+
+    mf1.dump()
+
+    assert(mf1.check())
+
+    # Now check the fullpath is the same as the filepath
+    for filepath in mf1:
+        assert(mf1.fullpath(filepath) == filepath)
+
+        
+

@@ -76,4 +76,5 @@ def hash(path, hashfn, size=one_hundred_megabytes):
     except IOError as e:
         sys.stderr.write('{}\nCannot hash, skipping {}\n'.format(str(e),path))
         return None
+        
 
