@@ -28,7 +28,7 @@ Install
 
 Conda install::
 
-    conda install -c aidanheerdegen yamanifest
+    conda install -c coecms yamanifest
 
 Pip install (into a virtual environment)::
 
