@@ -65,4 +65,8 @@ target/
 /README.cookiecutter.md
 
 # Data test files
-*.nc *.res *.bin *_table *.yaml
+*.nc 
+*.res 
+*.bin 
+*_table 
+*.yaml
