@@ -1,0 +1,96 @@
+CHANGES
+=======
+
+0.3.1
+-----
+
+* Removed non-deterministic test
+* Added multiprocessing support to check\_file()
+* Intermediate stage of refactor. Passes test but no multiprocessing
+* More useful error output in yamf.py
+* Fixed bug. Hashing needs to occur on fullpath, otherwise nchash is wrong
+* Can now chain a load() to class instantiation. Added test
+
+0.3.0
+-----
+
+* Fixed test being performed in incorrect directory
+* Changed yamanifest format to include header with metadata by having two YaML documents in the file. This means it is possible to check if the file is a valid yamanifest, which might be difficult otherwise as any yaml file will be loaded without complaint
+
+0.2.6
+-----
+
+* Noop committo force circleci rebuild
+
+0.2.5
+-----
+
+* Refactored add() so that it does not save paths which do not contain a valid hash
+* Enclose hashing in try/except block and return None for unhashable paths (like directories)
+* Corrected circleci to point to coecms organisation
+
+0.2.4.2
+-------
+
+* Removed pypi deployment
+
+0.2.4.1
+-------
+
+* Trying to get pypi deploy to work. Commented out repo
+
+0.2.4
+-----
+
+* Added pypi deploy to travis
+* Made shortcircuit option for add + tests
+
+0.2.3
+-----
+
+* Added \_\_len\_\_ function to Manifest class. Added test for len()
+
+0.2.2
+-----
+
+* Add coecms channel to circle config
+* Removed ncchash from meta.yaml conda requirements
+* Removed tab indentation in meta.yaml
+* Added conda dependencies for CircleCI
+* Added actual shortcircuit test
+* Cleaned up shortcircuit logic in check\_file. Probably an undocumented bug in the return code logic
+* Changed to subparser for yamf
+* Added yamf test
+* Pass fullpath to hash calculation function. When there were two levels of symbolic link the file could not be found
+* Added cli interface (yamf). Can create and check manifests
+* Supplying a hash function is now optional. Use defaults if not supplied
+* Changed all the manifest file names to something more systematic and reflecting best practise: now have .yaml suffix
+* Made import cleaner by adding \_\_init\_\_.py imports
+* Updated nchash import requires more recent version
+* Print python version information to test stdout for verification
+* Used cleaner import syntax for nchash
+* Change nchash dependency
+* Using updated nchash, catching not netCDF file format errors and silently ignoring. Allows for easy specification of a hash hierarchy
+* Added check method to check all filepaths
+* Changed API to more generic and understandable method names
+* Added class methods for checking if a path exists, and if a hash function exists for that path, and tests
+* Specified higher version of nchash: fixed again
+* Specified higher version of nchash: fixed
+* Specified higher version of nchash
+* Updated travis build environment for dependencies
+* Updated README
+
+0.2.1
+-----
+
+* Removed codeclimate badge
+
+0.2
+---
+
+* Removed landscape badge from README
+* Simplified manifest format. File paths are now top level in the manifest dictionary
+* Added missing test files
+* Working version with some testing
+* Initial working version. Opted for flat structure with complex data structure over classes, which would require translating back and forwards to YAML compatible complex data structure
+* Initial commit from cookie cutter output
