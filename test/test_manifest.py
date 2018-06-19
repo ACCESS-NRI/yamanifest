@@ -466,7 +466,7 @@ def test_specify_fullpath_as_array():
     fullpaths = [ os.path.join('test',f) for f in files]
 
     # Specify a fullpath that is the same as the filepath
-    mf1.add(files,['md5'],fullpath=fullpaths)
+    mf1.add(fullpaths,['md5'],fullpath=fullpaths)
 
     assert(len(mf1) == len(files))
 
