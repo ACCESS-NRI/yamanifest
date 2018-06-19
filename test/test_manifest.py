@@ -457,5 +457,26 @@ def test_specify_fullpath():
     for filepath in mf1:
         assert(mf1.fullpath(filepath) == filepath)
 
+
+def test_specify_fullpath_as_array():
+
+    mf1 = mf.Manifest('mf1.yaml')
+
+    files = ['file1','file2']
+    fullpaths = [ os.path.join('test',f) for f in files]
+
+    # Specify a fullpath that is the same as the filepath
+    mf1.add(files,['md5'],fullpath=fullpaths)
+
+    assert(len(mf1) == len(files))
+
+    mf1.dump()
+
+    assert(mf1.check())
+
+    # Now check the fullpath is the same as the filepath
+    for filepath in mf1:
+        assert(mf1.fullpath(filepath) == filepath)
+
         
 

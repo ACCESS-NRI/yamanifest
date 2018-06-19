@@ -138,12 +138,19 @@ class Manifest(object):
             if type(filepaths) is str:
                 filepaths = [filepaths,]
 
+        if fullpath is None:
+            fullpath = [None] * len(filepaths)
+        else:
+            if type(fullpath) is str:
+                fullpath = [fullpath,]
+            assert(len(filepaths) == len(fullpath))
+
         tmpfilepaths = []
         tmpfns = []
 
         results = defaultdict(dict)
 
-        for filepath in filepaths:
+        for (filepath,fullpath) in zip(filepaths,fullpath):
             
             if filepath not in self.data:
                 # These must be defined so that queries do not fail later
