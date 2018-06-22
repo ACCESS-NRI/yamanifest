@@ -58,6 +58,7 @@ class cd:
         os.chdir(self.savedPath)
 
 def setup_module(module):
+    teardown_module(module)
     if verbose: print ("setup_module      module:%s" % module.__name__)
     if verbose: print ("Python version: {}".format(sys.version))
     shutil.copytree(os.path.join('test','testfiles'),os.path.join('test','testfiles_copy'))
