@@ -25,6 +25,8 @@ import io
 import os
 import sys
 from nchash import NCDataHash, NotNetcdfFileError
+import fs
+from fs import path as fspath
 
 length=io.DEFAULT_BUFFER_SIZE
 one_hundred_megabytes = 104857600
@@ -33,7 +35,7 @@ one_hundred_megabytes = 104857600
 # calculation
 supported_hashes = ['nchash', 'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']
 
-def hash(path, hashfn, size=one_hundred_megabytes):
+def hash(path, hashfn, size=one_hundred_megabytes, verbose=False):
     """ A simple wrapper that inspects the hashing function and intercepts
     calls to nchash and binhash so they are processed in a special way.
 
@@ -41,6 +43,20 @@ def hash(path, hashfn, size=one_hundred_megabytes):
     """
 
     try:
+        presult = None; fsobj = None; lpath = None
+        # Determine if path is a fs url or ordinary path, and
+        # open a fs object and set lpath accordingly
+        try:
+            presult = fs.opener.parse(path)
+        except fs.opener.errors.ParseError as e:
+            if verbose: print("{} is not a fs2 URL".format(path))
+        if presult is not None and presult.path is not None:
+            fsobj, lpath = fs.opener.open(path,writeable=False)    
+        else:
+            # Is a normal path
+            dirpath, lpath = fspath.split(path)
+            fsobj = fs.open_fs(dirpath)
+
         if hashfn == 'nchash':
             hashval = ''
             m = NCDataHash(path)
@@ -52,9 +68,10 @@ def hash(path, hashfn, size=one_hundred_megabytes):
             return hashval
         elif hashfn == 'binhash':
             m = hashlib.new('md5')
-            with io.open(path, mode="rb") as fd:
+            info = fsobj.getdetails(lpath)
+            with fsobj.openbin(lpath) as fd:
                 # Size limited hashing, so prepend the filename, size and modification time 
-                hashstring = os.path.basename(path) + str(os.path.getsize(path)) + str(os.path.getmtime(path))
+                hashstring = fs.path.basename(path) + str(info.size) + info.modified.strftime("%s")
                 m.update(hashstring.encode())
                 tot = 0
                 for chunk in iter(lambda: fd.read(length), b''):
@@ -69,10 +86,11 @@ def hash(path, hashfn, size=one_hundred_megabytes):
         else:
             # from https://stackoverflow.com/a/40961519
             m = hashlib.new(hashfn)
-            with io.open(path, mode="rb") as fd:
+            with fsobj.openbin(lpath) as fd:
                 for chunk in iter(lambda: fd.read(length), b''):
                     m.update(chunk)
             return m.hexdigest()
+
     except IOError as e:
         sys.stderr.write('{}\nCannot hash, skipping {}\n'.format(str(e),path))
         return None
