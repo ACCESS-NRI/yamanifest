@@ -20,6 +20,8 @@ import pytest
 import sys, os, time, glob
 import shutil
 import pdb # Add pdb.set_trace() to set breakpoints
+import fs
+from fs import copy, tarfs, zipfs
 
 print("Version: {}".format(sys.version))
 
@@ -480,4 +482,43 @@ def test_specify_fullpath_as_array():
         assert(mf1.fullpath(filepath) == filepath)
 
         
+def test_adding_tar_contents():
 
+    mf11 = mf.Manifest('mf11.yaml')
+
+    files = ['file1','file2']
+
+    fsobj = fs.open_fs('test')
+
+    with tarfs.TarFS('test/foo.tar.gz',write=True) as new_tar:
+        for path in files:
+            copy.copy_file(fsobj,path,new_tar,path)
+
+    with zipfs.ZipFS('test/foo.zip',write=True) as new_zip:
+        for path in files:
+            copy.copy_file(fsobj,path,new_zip,path)
+
+    with tarfs.TarFS('test/foo.tar.gz',write=False) as old_tar:
+        for path in old_tar.listdir('/'):
+            url='tar://{}/foo.tar.gz!'.format('test') + path
+            # fullurl='tar://{}/foor.tar/gz!'.format(os.path.join(os.path.getcwd(),'test')) + path
+            mf11.add(url, fullpath=url)
+
+    with zipfs.ZipFS('test/foo.zip',write=False) as old_zip:
+        for path in old_zip.listdir('/'):
+            url='zip://{}/foo.zip!'.format('test') + path
+            mf11.add(url, fullpath=url)
+
+    mf11.dump()
+
+    assert(mf11.check())
+        
+def test_adding_tar_contents_internally():
+
+    mf12 = mf.Manifest('mf12.yaml')
+
+    mf12.add('test/foo.tar.gz',expandarchive=True)
+
+    mf12.dump()
+
+    assert(mf12.check())

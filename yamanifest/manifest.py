@@ -29,9 +29,10 @@ import copy
 import subprocess
 import multiprocessing as mp
 from collections import defaultdict
+import magic
 
 from .hashing import hash, supported_hashes
-from yamanifest.utils import find_files
+from yamanifest.utils import find_files, get_archive_urls, is_archive
 
 class HashExists(Exception):
     """Trying to add a hashed value when one already exists"""
@@ -123,7 +124,7 @@ class Manifest(object):
         """
         del(self.data[filepath])
 
-    def add(self, filepaths=None, hashfn=None, force=False, shortcircuit=False, fullpath=None):
+    def add(self, filepaths=None, hashfn=None, force=False, shortcircuit=False, fullpath=None, expandarchive=False):
         """
         Add hash value for filepath given a hashing function (hashfn).
         If no filepaths defined, default to all current filepaths, and in
@@ -144,6 +145,26 @@ class Manifest(object):
             if type(fullpath) is str:
                 fullpath = [fullpath,]
             assert(len(filepaths) == len(fullpath))
+
+        if expandarchive:
+            # Cycle through all the files looking for archive files to expand
+            # Would be nicer to do this in the loop below, but I it would mean
+            # changing the loop construction, so for the moment make this a
+            # separate operation
+            index = 0
+            # Modifying list in-place, so need to use index and while loop
+            while index < len(filepaths):
+                filepath = filepaths[index]
+                if is_archive(filepath):
+                    newfiles = get_archive_urls(filepath) 
+                    filespaths[index:index] = newfiles
+                    fullpath[index:index] = newfiles
+                    # Reset the index to point *after* the files we just 
+                    # inserted (reminder: deleted the original entry so no
+                    # index increment required)
+                    index = index + len(newfiles)
+                else:
+                    index += 1
 
         tmpfilepaths = []
         tmpfns = []
