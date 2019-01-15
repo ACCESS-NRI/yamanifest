@@ -123,7 +123,7 @@ class Manifest(object):
         """
         del(self.data[filepath])
 
-    def add(self, filepaths=None, hashfn=None, force=False, shortcircuit=False, fullpath=None):
+    def add(self, filepaths=None, hashfn=None, force=False, shortcircuit=False, fullpaths=None):
         """
         Add hash value for filepath given a hashing function (hashfn).
         If no filepaths defined, default to all current filepaths, and in
@@ -138,28 +138,31 @@ class Manifest(object):
             if type(filepaths) is str:
                 filepaths = [filepaths,]
 
-        if fullpath is None:
-            fullpath = [None] * len(filepaths)
+        if fullpaths is None:
+            fullpaths = [None] * len(filepaths)
         else:
-            if type(fullpath) is str:
-                fullpath = [fullpath,]
-            assert(len(filepaths) == len(fullpath))
+            if type(fullpaths) is str:
+                fullpaths = [fullpaths,]
+            assert(len(filepaths) == len(fullpaths))
 
         tmpfilepaths = []
         tmpfns = []
 
         results = defaultdict(dict)
 
-        for (filepath,fullpath) in zip(filepaths,fullpath):
+        for (filepath,fullpath) in zip(filepaths,fullpaths):
             
+            # These must be defined so that queries do not fail later
             if filepath not in self.data:
-                # These must be defined so that queries do not fail later
                 self.data[filepath] = {}
+
+            if 'hashes' not in self.data[filepath]:
                 self.data[filepath]["hashes"] = {}
-                if fullpath is None:
-                    self.data[filepath]['fullpath'] = os.path.realpath(filepath)
-                else:
-                    self.data[filepath]['fullpath'] = fullpath
+
+            if fullpath is None:
+                self.data[filepath]['fullpath'] = os.path.realpath(filepath)
+            else:
+                self.data[filepath]['fullpath'] = fullpath
 
             if hashfn is None:
                 fns = self.hashes

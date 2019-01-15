@@ -1,6 +1,37 @@
 CHANGES
 =======
 
+0.3.4
+-----
+
+* Fixed new test
+
+0.3.3
+-----
+
+* Added support for multiple fullpaths which is required for multiple files support
+* Added CHANGELOG and AUTHORS
+* Fixed gitignore syntax
+* Added some test data files to gitignore
+
+0.3.2
+-----
+
+* Changed to README.rst in setup
+* Fixed up some conda install bits n bobs
+* Added optional fullpath option to add(), to support specifying a path other than the result of path.relpath
+* Could not guarantee add() was traversing hash functions in the correct order when they were specified as arguments. This led to short circuit choosing the incorrect hash with python27. In the case of python3 the test passed
+* Changed default numproc to use all available CPUs
+* Added multiprocessing to add() and check() to improve speed
+* New update() function. Updates one manifest from the contents of another based on filepath
+* Added utils.py with find\_files utility
+* Changed update function to update\_matching\_hashes, to better reflect it's function, and allow for a new update function
+* Improved test for add() by testing case where no filepaths specified
+* add() now accepts list of filepaths. Added test
+* Better reporting of hash errors in yamf
+* Fixed check\_file to properly return hashes. Removed cruft in check\_file
+* Simplified return statement from check()
+
 0.3.1
 -----
 
