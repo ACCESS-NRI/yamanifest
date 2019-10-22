@@ -10,11 +10,13 @@ source:
     git_url: ../
 
 build:
-    script: python setup.py install
+    script: "{{ PYTHON }} -m pip install . --no-deps"
+    noarch: python
 
 requirements:
     build:
         - python
+        - pip
         - pbr
     run:
         - python
