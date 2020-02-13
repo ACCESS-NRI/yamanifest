@@ -10,7 +10,7 @@ source:
     git_url: ../
 
 build:
-    script: "{{ PYTHON }} -m pip install . --no-deps"
+    script: "python -m pip install . --no-deps"
     noarch: python
 
 requirements:
