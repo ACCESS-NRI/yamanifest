@@ -96,7 +96,7 @@ class Manifest(object):
         """
         try:
             with open(self.path, 'r') as file:
-                self.header, self.data = yaml.load_all(file, Loader=yaml.FullLoader)
+                self.header, self.data = yaml.safe_load_all(file)
             if "format" not in self.header:
                 raise ValueError('Not yamanifest format')
             if self.header["format"] != 'yamanifest':
