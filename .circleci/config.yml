@@ -22,12 +22,12 @@ jobs:
                 root: /artefacts
                 paths: '*'
 
-    py36:
+    py37:
         working_directory: /circleci
         docker:
             - image: scottwales/conda-build
               environment:
-                PYTHON_VER: 3.6
+                PYTHON_VER: 3.7
 
         steps:
             - checkout
@@ -64,7 +64,7 @@ workflows:
                     tags:
                         only: /.*/
 
-            - py36:
+            - py37:
                 filters:
                     tags:
                         only: /.*/
@@ -72,7 +72,7 @@ workflows:
             - publish:
                 requires:
                     - py27
-                    - py36
+                    - py37
                 filters:
                     tags:
                         only: /.*/
