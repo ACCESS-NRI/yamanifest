@@ -71,7 +71,6 @@ workflows:
 
             - publish:
                 requires:
-                    - py27
                     - py37
                 filters:
                     tags:
