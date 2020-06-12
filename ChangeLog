@@ -1,6 +1,24 @@
 CHANGES
 =======
 
+0.3.8
+-----
+
+* Removed py27 from publish requirements
+
+0.3.7
+-----
+
+* Bumped python version in conda
+
+0.3.6
+-----
+
+* Changed to safe\_load with yaml
+* CircleCI not building due to PYTHON var missing. Use bare python cmd
+* Specify loader to avoid deprecation warning
+* Make conda noarch
+
 0.3.5
 -----
 
