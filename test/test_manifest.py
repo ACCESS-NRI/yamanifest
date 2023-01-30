@@ -63,7 +63,7 @@ def setup_module(module):
     shutil.copytree(os.path.join('test','testfiles'),os.path.join('test','testfiles_copy'))
     make_random_binary_file(os.path.join('test','testfiles_copy','25mb.bin'),25*1024*1024)
     make_random_binary_file(os.path.join('test','testfiles_copy','100mb.bin'),100*1024*1024)
- 
+
 def teardown_module(module):
     if verbose: print ("teardown_module   module:%s" % module.__name__)
     shutil.rmtree(os.path.join('test','testfiles_copy'),ignore_errors=True)
@@ -173,7 +173,7 @@ def test_manifest_hash_with_binhash():
         mf4 = mf.Manifest('mf4.yaml')
 
         for filepath in glob.glob('*.bin'):
-            mf4.add(filepath,hashfn='binhash')
+            mf4.add(filepath,hashfn=['binhash', 'binhash-nomtime'])
 
         mf4.dump()
         assert(mf4.check())
@@ -182,7 +182,7 @@ def test_manifest_hash_with_binhash():
 
         for filepath in glob.glob('*.bin'):
             touch(filepath)
-            mf5.add(filepath,hashfn='binhash')
+            mf5.add(filepath,hashfn=['binhash', 'binhash-nomtime'])
 
         hashvals = {}
         assert(not mf4.check())
@@ -478,5 +478,25 @@ def test_specify_fullpath_as_array():
     for filepath in mf1:
         assert(mf1.fullpath(filepath) == filepath)
 
-        
+def test_binhash_nomtime():
 
+    with cd(os.path.join('test','testfiles_copy')):
+
+        mf1 = mf.Manifest(None)
+        mf2 = mf.Manifest(None)
+
+        for filepath in glob.glob('*.bin'):
+            mf1.add(filepath, hashfn='binhash')
+            mf2.add(filepath, hashfn='binhash-nomtime')
+
+        mf3 = mf.Manifest(None)
+        mf4 = mf.Manifest(None)
+
+        for filepath in glob.glob('*.bin'):
+            touch(filepath)
+            mf3.add(filepath, hashfn='binhash')
+            mf4.add(filepath, hashfn='binhash-nomtime')
+
+        assert(not mf1.equals(mf2))
+        assert(not mf1.equals(mf3))
+        assert(mf2.equals(mf4))
