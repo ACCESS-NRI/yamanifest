@@ -63,7 +63,7 @@ def setup_module(module):
     shutil.copytree(os.path.join('test','testfiles'),os.path.join('test','testfiles_copy'))
     make_random_binary_file(os.path.join('test','testfiles_copy','25mb.bin'),25*1024*1024)
     make_random_binary_file(os.path.join('test','testfiles_copy','100mb.bin'),100*1024*1024)
- 
+
 def teardown_module(module):
     if verbose: print ("teardown_module   module:%s" % module.__name__)
     shutil.rmtree(os.path.join('test','testfiles_copy'),ignore_errors=True)
@@ -477,6 +477,26 @@ def test_specify_fullpath_as_array():
     # Now check the fullpath is the same as the filepath
     for filepath in mf1:
         assert(mf1.fullpath(filepath) == filepath)
-
         
+def test_hash_path_info_flag():
+    
+    with cd(os.path.join('test','testfiles_copy')):
 
+        mf1 = mf.Manifest(None)
+        mf2 = mf.Manifest(None)
+
+        for filepath in glob.glob('*.bin'):
+            mf1.add(filepath, hashfn='binhash', hash_path_info=True)
+            mf2.add(filepath, hashfn='binhash', hash_path_info=False)
+            
+        mf3 = mf.Manifest(None)
+        mf4 = mf.Manifest(None)
+        
+        for filepath in glob.glob('*.bin'):
+            touch(filepath)
+            mf3.add(filepath, hashfn='binhash', hash_path_info=True)
+            mf4.add(filepath, hashfn='binhash', hash_path_info=False)
+            
+        assert(not mf1.equals(mf2))
+        assert(not mf1.equals(mf3))
+        assert(mf2.equals(mf4))
