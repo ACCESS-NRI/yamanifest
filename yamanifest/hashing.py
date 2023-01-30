@@ -31,7 +31,9 @@ one_hundred_megabytes = 104857600
 
 # List of supported hashes and the ordering used to determine relative expense of
 # calculation
-supported_hashes = ['nchash', 'binhash', 'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']
+supported_hashes = [
+    'nchash', 'binhash', 'binhash-nomtime', 'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'
+]
 
 def _nchash(path):
     hashval = ''
