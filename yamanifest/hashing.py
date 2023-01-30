@@ -33,7 +33,7 @@ one_hundred_megabytes = 104857600
 # calculation
 supported_hashes = ['nchash', 'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']
 
-def hash(path, hashfn, size=one_hundred_megabytes, include_filename=True, include_mtime=True):
+def hash(path, hashfn, size=one_hundred_megabytes):
     """ A simple wrapper that inspects the hashing function and intercepts
     calls to nchash and binhash so they are processed in a special way.
 
@@ -53,13 +53,8 @@ def hash(path, hashfn, size=one_hundred_megabytes, include_filename=True, includ
         elif hashfn == 'binhash':
             m = hashlib.new('md5')
             with io.open(path, mode="rb") as fd:
-                # Size limited hashing, so prepend the size and optionally the filename
-                # and modification time
-                hashstring = str(os.path.getsize(path))
-                if include_filename:
-                    hashstring += os.path.basename(path)
-                if include_mtime:
-                    hashstring += str(os.path.getmtime(path))
+                # Size limited hashing, so prepend the filename, size and modification time 
+                hashstring = os.path.basename(path) + str(os.path.getsize(path)) + str(os.path.getmtime(path))
                 m.update(hashstring.encode())
                 tot = 0
                 for chunk in iter(lambda: fd.read(length), b''):

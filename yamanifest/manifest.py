@@ -123,7 +123,7 @@ class Manifest(object):
         """
         del(self.data[filepath])
 
-    def add(self, filepaths=None, hashfn=None, force=False, shortcircuit=False, fullpaths=None, **kwargs):
+    def add(self, filepaths=None, hashfn=None, force=False, shortcircuit=False, fullpaths=None):
         """
         Add hash value for filepath given a hashing function (hashfn).
         If no filepaths defined, default to all current filepaths, and in
@@ -182,7 +182,7 @@ class Manifest(object):
                 tmpfilepaths.append(filepath)
                 tmpfns.append(fn)
         
-        results = self.calc_hashes(tmpfilepaths, tmpfns, **kwargs)
+        results = self.calc_hashes(tmpfilepaths, tmpfns)
                 
         for filepath in results:
 
@@ -257,7 +257,7 @@ class Manifest(object):
 
         return hashval
         
-    def calc_hashes(self, filepaths, hashfns, **kwargs):
+    def calc_hashes(self, filepaths, hashfns):
         """
         Calculate hash values for a number of filepaths and hash function combinations
         """
@@ -269,11 +269,7 @@ class Manifest(object):
 
         # print("Queuing jobs")
         for filepath, fn in zip(filepaths,hashfns):
-            results[filepath][fn] = pool.apply_async(
-                hash, 
-                args=(self.data[filepath]["fullpath"], fn),
-                kwds=kwargs
-            )
+            results[filepath][fn] = pool.apply_async(hash, args=(self.data[filepath]["fullpath"], fn))
 
         pool.close()
         pool.join()
@@ -286,7 +282,7 @@ class Manifest(object):
 
         return results
 
-    def check_file(self, filepaths, hashfn=None, hashvals=None, shortcircuit=False, condition=all, **kwargs):
+    def check_file(self, filepaths, hashfn=None, hashvals=None, shortcircuit=False, condition=all):
         """
         Check hash value for a filepath given a hashing function (hashfn)
         matches stored hash value. Return values of non-matching hashes
@@ -338,7 +334,7 @@ class Manifest(object):
                     tmpfilepaths.append(filepath)
                     tmpfns.append(fn)
 
-        results = self.calc_hashes(tmpfilepaths, tmpfns, **kwargs)
+        results = self.calc_hashes(tmpfilepaths, tmpfns)
 
         for filepath in filepaths:
 
