@@ -31,7 +31,46 @@ one_hundred_megabytes = 104857600
 
 # List of supported hashes and the ordering used to determine relative expense of
 # calculation
-supported_hashes = ['nchash', 'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']
+supported_hashes = [
+    'nchash', 'binhash', 'binhash-nomtime', 'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'
+]
+
+def _nchash(path):
+    hashval = ''
+    m = NCDataHash(path)
+    try:
+        hashval = m.gethash()
+    except NotNetcdfFileError as e:
+        sys.stderr.write(str(e))
+        hashval = None
+    return hashval
+
+def _binhash(path, size, include_mtime):
+    m = hashlib.new('md5')
+    with io.open(path, mode="rb") as fd:
+        # Size limited hashing, so prepend the filename, size and optionally modification time 
+        hashstring = str(os.path.getsize(path)) + os.path.basename(path)
+        if include_mtime:
+            hashstring +=str(os.path.getmtime(path))
+        m.update(hashstring.encode())
+        tot = 0
+        for chunk in iter(lambda: fd.read(length), b''):
+            tot += len(chunk)
+            if tot >= size:
+                rem = (size-tot)
+                if rem <= 0:
+                    break
+                chunk = chunk[:rem]
+            m.update(chunk)
+    return m.hexdigest()
+
+def _hashlib(path, hashfn):
+    # from https://stackoverflow.com/a/40961519
+    m = hashlib.new(hashfn)
+    with io.open(path, mode="rb") as fd:
+        for chunk in iter(lambda: fd.read(length), b''):
+            m.update(chunk)
+    return m.hexdigest()
 
 def hash(path, hashfn, size=one_hundred_megabytes):
     """ A simple wrapper that inspects the hashing function and intercepts
@@ -39,40 +78,17 @@ def hash(path, hashfn, size=one_hundred_megabytes):
 
     TODO: make plugins that allow this transparently
     """
-
+    if hashfn not in supported_hashes:
+        sys.stderr.write('\nUnsupported hash function {}, skipping {}\n'.format(hashfn, path))
     try:
         if hashfn == 'nchash':
-            hashval = ''
-            m = NCDataHash(path)
-            try:
-                hashval = m.gethash()
-            except NotNetcdfFileError as e:
-                sys.stderr.write(str(e))
-                hashval = None
-            return hashval
+            return _nchash(path)
         elif hashfn == 'binhash':
-            m = hashlib.new('md5')
-            with io.open(path, mode="rb") as fd:
-                # Size limited hashing, so prepend the filename, size and modification time 
-                hashstring = os.path.basename(path) + str(os.path.getsize(path)) + str(os.path.getmtime(path))
-                m.update(hashstring.encode())
-                tot = 0
-                for chunk in iter(lambda: fd.read(length), b''):
-                    tot += len(chunk)
-                    if tot >= size:
-                        rem = (size-tot)
-                        if rem <= 0:
-                            break
-                        chunk = chunk[:rem]
-                    m.update(chunk)
-            return m.hexdigest()
+            return _binhash(path, one_hundred_megabytes, True)
+        elif hashfn == 'binhash-nomtime':
+            return _binhash(path, one_hundred_megabytes, False)
         else:
-            # from https://stackoverflow.com/a/40961519
-            m = hashlib.new(hashfn)
-            with io.open(path, mode="rb") as fd:
-                for chunk in iter(lambda: fd.read(length), b''):
-                    m.update(chunk)
-            return m.hexdigest()
+            return _hashlib(path, hashfn)
     except IOError as e:
         sys.stderr.write('{}\nCannot hash, skipping {}\n'.format(str(e),path))
         return None
