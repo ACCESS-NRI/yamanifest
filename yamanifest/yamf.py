@@ -37,7 +37,6 @@ def parse_args(args):
     parser_add = subparsers.add_parser('add', help='Add filepaths to manifest')
     parser_add.add_argument('-n','--name', default='manifest.yaml', action='store', help='Manifest file name')
     parser_add.add_argument("-f","--force", help="Force overwrite of existing manifest", action='store_true')
-    parser_add.add_argument("-u", "--update", help="Update entries of existing manifest", action="store_true")
     parser_add.add_argument("-s","--hashes", help="Use only these hashing functions", action='append')
     parser_add.add_argument("files", help="File paths to add to manifest", nargs='+')
 
