@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+0.3.9
+-----
+
+* Fixed `--force` so it loads the existing data instead of recreating the manifest file from scratch.
+
 0.3.8
 -----
 
