@@ -56,9 +56,8 @@ def main(args):
     mf1 = mf.Manifest(args.name)
     if args.command == 'add':
         if os.path.exists(args.name):
-            # If manifest exists load existing hash data unless --force
-            if not args.force:
-                mf1.load()
+            # If manifest exists load existing hash data
+            mf1.load()
         mf1.add(args.files,hashfn=args.hashes,force=args.force)
         mf1.dump()
 
