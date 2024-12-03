@@ -70,4 +70,5 @@ target/
 *.res 
 *.bin 
 *_table 
-*.yaml
+# Commenting out so meta.yaml is tracked by git
+# *.yaml

@@ -1,0 +1,50 @@
+[project]
+name = "yamanifest"
+authors = [
+  {name = "Aidan Heerdegen", email="aidan.heerdegen@anu.edu.au"},
+]
+maintainers = [
+    { name = "ACCESS-NRI", email = "access.nri@anu.edu.au" }
+]
+description = "General YAML manifest format"
+license = { file = "LICENSE" }
+readme = "README.rst"
+dynamic = ["version"]
+requires-python = ">=3.10"
+dependencies = [
+    "PyYAML",
+    "nchash>=0.1.5",
+    "six"
+]
+
+# [project.optional-dependencies]
+# test = [
+#    "pytest",
+#    "pylint",
+#   "Sphinx"
+# ]
+
+[project.scripts]
+yamf = "yamanifest.yamf:main_argv"
+
+[project.urls]
+Repository = "https://github.com/ACCESS-NRI/yamanifest"
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+    "setuptools>64", 
+    "versioneer[toml]"
+]
+
+[tool.setuptools.packages.find]
+include = ["yamanifest*"]
+namespaces = false
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "yamanifest/_version.py"
+versionfile_build = "yamanifest/_version.py"
+tag_prefix = ""
+parentdir_prefix = "yamanifest-"
