@@ -32,7 +32,7 @@ jobs:
           filters: |
             files:
               - 'pyproject.toml'
-              - 'setup.cfg'
+              - 'setup.py'
               - '.conda/env_build.yml'
               - '.conda/meta.yml'
 
