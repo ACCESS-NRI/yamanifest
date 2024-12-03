@@ -33,5 +33,5 @@ jobs:
           meta_yaml_dir: .conda
           python-version: ${{ vars.PY_VERSION }}
           user: accessnri
-          label: master
+          label: main
           token: ${{ secrets.ANACONDA_TOKEN }}
