@@ -49,7 +49,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@a4260408e20b96e80095f42ff7f1a15b27dd94ca # v3.0.4
         with:
           miniconda-version: "latest"
-          python-version:  vars.PY_VERSION
+          python-version: "3.10" # TODO: Add back in vars.PY_VERSION
           environment-file: .conda/env_build.yml
           auto-activate-base: false
           auto-update-conda: false
