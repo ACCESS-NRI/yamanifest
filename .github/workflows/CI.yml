@@ -105,10 +105,6 @@ jobs:
         shell: bash -l {0}
         run: conda list
 
-      # - name: Lint # TODO: Add back in linting 
-      #   shell: bash -l {0}
-      #   run: pylint --extension-pkg-whitelist=netCDF4 --ignored-modules=yamanifest -E yamanifest
-
       - name: Entrypoint test of driver script
         shell: bash -l {0}
         run: yamf --help

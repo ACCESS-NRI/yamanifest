@@ -17,13 +17,6 @@ dependencies = [
     "six"
 ]
 
-# [project.optional-dependencies]
-# test = [
-#    "pytest",
-#    "pylint",
-#   "Sphinx"
-# ]
-
 [project.scripts]
 yamf = "yamanifest.yamf:main_argv"
 

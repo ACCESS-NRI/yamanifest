@@ -15,5 +15,4 @@ dependencies:
     - nchash>=0.1.5
     - pytest
     - pytest-cov
-    - pylint
     - versioneer
