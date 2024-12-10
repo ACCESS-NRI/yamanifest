@@ -10,3 +10,9 @@ dependencies:
     - pbr
     - netcdf4
     - libnetcdf
+    - six
+    - PyYAML
+    - nchash>=0.1.5
+    - pytest
+    - pytest-cov
+    - versioneer

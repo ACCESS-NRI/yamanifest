@@ -28,7 +28,7 @@ Install
 
 Conda install::
 
-    conda install -c coecms yamanifest
+    conda install -c access-nri yamanifest
 
 Pip install (into a virtual environment)::
 
@@ -44,19 +44,14 @@ Develop
 
 Development install::
 
-    git checkout https://github.com/aidanheerdegen/yamanifest
+    git checkout https://github.com/ACCESS-NRI/yamanifest
     cd yamanifest
-    conda env create -f conda/dev-environment.yml
+    conda env create -f .conda/env_dev.yml
     source activate yamanifest-dev
-    pip install -e '.[dev]'
-
-The `dev-environment.yml` file is for speeding up installs and installing
-packages unavailable on pypi, `requirements.txt` is the source of truth for
-dependencies.
 
 Run tests::
 
-    py.test
+    python -m pytest -s
 
 Build documentation::
 

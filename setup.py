@@ -1,12 +1,9 @@
 #!/usr/bin/env python
-#
-# Uses Python Build Reasonableness https://docs.openstack.org/developer/pbr/
-# Add configuration to `setup.cfg`
 
 from setuptools import setup
+import versioneer
 
 setup(
-        setup_requires=['pbr>=1.9', 'setuptools>=17.1'],
-        pbr=True,
-        )
-
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
+)
