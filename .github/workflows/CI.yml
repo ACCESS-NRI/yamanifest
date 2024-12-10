@@ -49,7 +49,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@a4260408e20b96e80095f42ff7f1a15b27dd94ca # v3.0.4
         with:
           miniconda-version: "latest"
-          python-version: "3.10" # TODO: Add back in vars.PY_VERSION
+          python-version: ${{ vars.PY_VERSION }}
           environment-file: .conda/env_build.yml
           auto-activate-base: false
           auto-update-conda: false
@@ -60,12 +60,12 @@ jobs:
         # Ignores: 
         # C2105 - Found invalid package version in meta.yaml
         # C2122 - Found invalid license family
-        run: conda-verify .conda --ignore C2105,C2122
+        run: conda-verify .conda --ignore C2105,C2122 --exit
 
       - name: Run conda build
         shell: bash -el {0}
         run: |
-          conda build . --no-anaconda-upload --output-folder=./build -c conda-forge -c accessnri -c coecms
+          conda build . --no-anaconda-upload --output-folder=./build
 
       - name: Verify conda package
         shell: bash -el {0}
@@ -73,7 +73,7 @@ jobs:
         # C1105 - Found invalid version number in info/index.json
         # C1115 - Found invalid license in info/index.json
         # C1141 - Found python file without a corresponding pyc file
-        run: conda-verify ./build/noarch/*.tar.bz2 --ignore C1105,C1115,C1141
+        run: conda-verify ./build/noarch/*.tar.bz2 --ignore C1105,C1115,C1141 --exit
   
   tests:
     name: Tests
@@ -116,7 +116,7 @@ jobs:
       - name: Run tests
         shell: bash -l {0}
         run:  |
-          python -m pytest --cov=yamanifest --cov-report=html -s # test
+          python -m pytest --cov=yamanifest --cov-report=html -s test
 
       # - name: Upload code coverage
       #   # Only upload once for the installed version
