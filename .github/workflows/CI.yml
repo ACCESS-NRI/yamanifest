@@ -57,6 +57,9 @@ jobs:
 
       - name: Verify conda recipe
         shell: bash -el {0}
+        # Ignores: 
+        # C2105 - Found invalid package version in meta.yaml
+        # C2122 - Found invalid license family
         run: conda-verify .conda --ignore C2105,C2122
 
       - name: Run conda build
@@ -66,6 +69,10 @@ jobs:
 
       - name: Verify conda package
         shell: bash -el {0}
+        # Ignores:
+        # C1105 - Found invalid version number in info/index.json
+        # C1115 - Found invalid license in info/index.json
+        # C1141 - Found python file without a corresponding pyc file
         run: conda-verify ./build/noarch/*.tar.bz2 --ignore C1105,C1115,C1141
   
   tests:
