@@ -49,7 +49,7 @@ def _binhash(path, size, include_mtime):
     m = hashlib.new('md5')
     with io.open(path, mode="rb") as fd:
         # Size limited hashing, so prepend the filename, size and optionally modification time 
-        hashstring = str(os.path.getsize(path)) + os.path.basename(path)
+        hashstring = os.path.basename(path) + str(os.path.getsize(path))
         if include_mtime:
             hashstring +=str(os.path.getmtime(path))
         m.update(hashstring.encode())
