@@ -1,0 +1,11 @@
+channels:
+    - accessnri
+    - conda-forge
+    - coecms
+    - nodefaults
+
+dependencies:
+    - anaconda-client
+    - conda-build
+    - conda-verify
+    - versioneer

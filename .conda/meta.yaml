@@ -1,0 +1,45 @@
+{% set version = load_setup_py_data(setup_file='../setup.py', from_recipe_dir=True).get('version') %}
+{% set project = load_file_data('../pyproject.toml', from_recipe_dir=True).get('project') %}
+
+package:
+    name: {{ project.get('name') }}
+    version: "{{ version }}"
+
+build:
+    noarch: python
+    number: 0
+    script: "python3 -m pip install . -vv"
+    entry_points:
+        {% for name, script in project.get('scripts').items() %}
+        - {{ name }} = {{ script }}
+        {% endfor %}
+
+source:
+    path: ../
+
+requirements:
+    build:
+        - python
+        - pip
+        - setuptools >=61.0.0
+        - versioneer
+    run:
+        - python
+        - six
+        - pyyaml
+        - nchash
+
+test:
+    imports:
+        - yamanifest
+    commands:
+    {% for name, script in project.get('scripts').items() %}
+        - {{ name }} --help
+    {% endfor %}
+
+about:
+    home: {{ project.get('urls').get('Repository') }}
+    license: Apache Software
+    license_file: LICENSE
+    summary: {{ project.get('description') }}
+    license_family: Apache
