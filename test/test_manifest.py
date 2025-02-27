@@ -18,10 +18,8 @@ from __future__ import print_function
 
 import glob
 import os
-import pdb  # Add pdb.set_trace() to set breakpoints
 import shutil
 import sys
-import time
 
 import pytest
 
@@ -32,7 +30,6 @@ from yamanifest import yamf
 
 verbose = True
 
-import os
 
 
 def touch(fname, times=None):
@@ -119,7 +116,7 @@ def test_manifest_netcdf():
         mf1 = mf.Manifest('mf1.yaml')
 
         for filepath in glob.glob('*.nc'):
-            mf1.add(filepath,['md5','sha1'])
+            mf1.add(filepath,['binhash','md5','sha1'])
 
         mf1.dump()
 
@@ -128,7 +125,7 @@ def test_manifest_netcdf():
         mf2 = mf.Manifest('mf2.yaml')
         
         for filepath in glob.glob('*.nc'):
-            mf2.add(filepath,['md5','sha1'])
+            mf2.add(filepath,['binhash','md5','sha1'])
 
         mf2.dump()
 
@@ -155,10 +152,10 @@ def test_manifest_netcdf_changed_time():
 
         for filepath in glob.glob('*.nc'):
             touch(filepath)
-            mf3.add(filepath,['md5','sha1'])
+            mf3.add(filepath,['md5','sha1','binhash'])
 
         mf3.dump()
-
+        mf3.add(filepath,['md5','sha1','binhash'])
         mf2 = mf.Manifest('mf2.yaml')
         mf2.load()
 
@@ -210,7 +207,7 @@ def test_manifest_find():
             assert(mf1.find(hashfn,hashval) == filepath)
 
         # Test for one we know shouldn't be there
-        for hashfn in ['binhash',]:
+        for hashfn in ['binhash-nomtime',]:
             hashval = mf1.get(filepath,hashfn)
             print(hashfn,hashval,filepath,mf1.find(hashfn,hashval))
             assert(mf1.find(hashfn,hashval) == None)
