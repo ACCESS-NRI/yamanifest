@@ -16,10 +16,12 @@ limitations under the License.
 
 from __future__ import print_function
 
-import pytest
-import sys, os, time, glob
+import glob
+import os
 import shutil
-import pdb # Add pdb.set_trace() to set breakpoints
+import sys
+
+import pytest
 
 print("Version: {}".format(sys.version))
 
@@ -28,7 +30,8 @@ from yamanifest import yamf
 
 verbose = True
 
-import os
+
+
 def touch(fname, times=None):
     with open(fname, 'a'):
         os.utime(fname, times)
@@ -113,7 +116,7 @@ def test_manifest_netcdf():
         mf1 = mf.Manifest('mf1.yaml')
 
         for filepath in glob.glob('*.nc'):
-            mf1.add(filepath,['nchash','md5','sha1'])
+            mf1.add(filepath,['binhash','md5','sha1'])
 
         mf1.dump()
 
@@ -122,7 +125,7 @@ def test_manifest_netcdf():
         mf2 = mf.Manifest('mf2.yaml')
         
         for filepath in glob.glob('*.nc'):
-            mf2.add(filepath,['nchash','md5','sha1'])
+            mf2.add(filepath,['binhash','md5','sha1'])
 
         mf2.dump()
 
@@ -136,7 +139,7 @@ def test_manifest_netcdf():
 
         mf1 = mf.Manifest('mf1.yaml')
         
-        mf1.add(glob.glob('*.nc'),['nchash'])
+        mf1.add(glob.glob('*.nc'),['binhash'])
         mf1.add(hashfn=['md5','sha1'])
 
     assert(mf1.equals(mf2))
@@ -149,10 +152,10 @@ def test_manifest_netcdf_changed_time():
 
         for filepath in glob.glob('*.nc'):
             touch(filepath)
-            mf3.add(filepath,['nchash','md5','sha1'])
+            mf3.add(filepath,['md5','sha1','binhash'])
 
         mf3.dump()
-
+        mf3.add(filepath,['md5','sha1','binhash'])
         mf2 = mf.Manifest('mf2.yaml')
         mf2.load()
 
@@ -198,13 +201,13 @@ def test_manifest_find():
 
     for filepath in mf1:
         # Test for hashes we know should be in the manifest
-        for hashfn in ['nchash','md5','sha1']:
+        for hashfn in ['md5','sha1']:
             hashval = mf1.get(filepath,hashfn)
             print(hashfn,hashval,filepath,mf1.find(hashfn,hashval))
             assert(mf1.find(hashfn,hashval) == filepath)
 
         # Test for one we know shouldn't be there
-        for hashfn in ['binhash',]:
+        for hashfn in ['binhash-nomtime',]:
             hashval = mf1.get(filepath,hashfn)
             print(hashfn,hashval,filepath,mf1.find(hashfn,hashval))
             assert(mf1.find(hashfn,hashval) == None)
@@ -213,9 +216,9 @@ def test_manifest_find():
 
         mf2 = mf.Manifest('mf2.yaml')
 
-        # Make a manifest only with nchash
+        # Make a manifest only with md5
         for filepath in glob.glob('*.nc'):
-            mf1.add(filepath,['nchash'])
+            mf1.add(filepath,['md5'])
 
         # Update with hashes from mf1
         mf2.update_matching_hashes(mf1)
@@ -227,7 +230,7 @@ def test_manifest_find():
     mf3 = mf.Manifest('mf3.yaml')
     
     for filepath in glob.glob(os.path.join('test','testfiles','*.nc')):
-        mf3.add(filepath,['nchash'])
+        mf3.add(filepath,['md5'])
 
     mf3.update_matching_hashes(mf1)
 
@@ -241,7 +244,7 @@ def test_manifest_with_mixed_file_types():
         mf6 = mf.Manifest('mf6.yaml')
 
         for filepath in glob.glob('*.bin') + glob.glob('*.nc'):
-            mf6.add(filepath,hashfn=['nchash','binhash'])
+            mf6.add(filepath,hashfn=['binhash'])
 
         mf6.dump()
         assert(mf6.check())
@@ -261,7 +264,7 @@ def test_open_manifest_and_add():
         mf7 = mf.Manifest('mf7.yaml')
 
         for filepath in glob.glob('*.nc'):
-            mf7.add(filepath,hashfn=['nchash','binhash'])
+            mf7.add(filepath,hashfn=['binhash'])
 
         mf7.dump()
 
@@ -271,7 +274,7 @@ def test_open_manifest_and_add():
         mf7.load()
 
         for filepath in glob.glob('*.bin'):
-            mf7.add(filepath,hashfn=['nchash','binhash'])
+            mf7.add(filepath,hashfn=['binhash'])
 
         mf7.dump()
 
@@ -293,7 +296,7 @@ def test_yamf():
     with cd(os.path.join('test','testfiles_copy')):
 
         files  = glob.glob('*.bin') + glob.glob('*.nc')
-        yamf.main_parse_args(["add","-n","mf8.yaml", "-s", "binhash", "-s", "nchash"] + files)
+        yamf.main_parse_args(["add","-n","mf8.yaml", "-s", "binhash"] + files)
 
         mf8 = mf.Manifest('mf8.yaml')
         mf8.load()
@@ -302,7 +305,7 @@ def test_yamf():
         mf6.load()
 
         assert(mf8.equals(mf6))
-        assert(yamf.main_parse_args(["check","-n","mf8.yaml", "-s", "binhash", "-s", "nchash"]))
+        assert(yamf.main_parse_args(["check","-n","mf8.yaml", "-s", "binhash"]))
 
 
 def test_shortcircuit_condition():
@@ -362,7 +365,7 @@ def test_shortcircuit_add():
         mf6 = mf.Manifest('mf6.yaml')
 
         for filepath in glob.glob('*.bin') + glob.glob('*.nc'):
-            mf6.add(filepath,hashfn=['nchash','binhash'],shortcircuit=True)
+            mf6.add(filepath,hashfn=['md5'],shortcircuit=True)
 
         mf6.dump()
         # print("mf6: ",mf6.data)
@@ -370,9 +373,9 @@ def test_shortcircuit_add():
 
         assert(mf6.check())
 
-        # Should have no nchash for the bin files
+        # Should have no sha1 for the bin files
         for filepath in glob.glob('*.bin'):
-            assert(mf6.get(filepath,hashfn='nchash') == None)
+            assert(mf6.get(filepath,hashfn='sha1') == None)
 
         # Should have no binhash for the netcdf files
         for filepath in glob.glob('*.nc'):
@@ -385,7 +388,7 @@ def test_malformed_file():
         mf9 = mf.Manifest('mf9.yaml')
 
         for filepath in glob.glob('*.nc'):
-            mf9.add(filepath,['nchash','md5','sha1'])
+            mf9.add(filepath,['md5','sha1'])
 
         # Intentionally alter the format string
         mf9.header["format"] = 'bogus'

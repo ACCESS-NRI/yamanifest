@@ -27,8 +27,6 @@ requirements:
         - python
         - six
         - pyyaml
-        - nchash
-
 test:
     imports:
         - yamanifest

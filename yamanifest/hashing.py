@@ -18,13 +18,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from __future__ import print_function, absolute_import
+from __future__ import absolute_import, print_function
 
 import hashlib
 import io
 import os
 import sys
-from nchash import NCDataHash, NotNetcdfFileError
 
 length=io.DEFAULT_BUFFER_SIZE
 one_hundred_megabytes = 104857600
@@ -32,18 +31,8 @@ one_hundred_megabytes = 104857600
 # List of supported hashes and the ordering used to determine relative expense of
 # calculation
 supported_hashes = [
-    'nchash', 'binhash', 'binhash-nomtime', 'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'
+    'binhash', 'binhash-nomtime', 'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'
 ]
-
-def _nchash(path):
-    hashval = ''
-    m = NCDataHash(path)
-    try:
-        hashval = m.gethash()
-    except NotNetcdfFileError as e:
-        sys.stderr.write(str(e))
-        hashval = None
-    return hashval
 
 def _binhash(path, size, include_mtime):
     m = hashlib.new('md5')
@@ -81,9 +70,7 @@ def hash(path, hashfn, size=one_hundred_megabytes):
     if hashfn not in supported_hashes:
         sys.stderr.write('\nUnsupported hash function {}, skipping {}\n'.format(hashfn, path))
     try:
-        if hashfn == 'nchash':
-            return _nchash(path)
-        elif hashfn == 'binhash':
+        if hashfn == 'binhash':
             return _binhash(path, one_hundred_megabytes, True)
         elif hashfn == 'binhash-nomtime':
             return _binhash(path, one_hundred_megabytes, False)
