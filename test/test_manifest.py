@@ -82,7 +82,7 @@ def test_manifest_read_write():
     files = ['file1','file2']
 
     for filepath in files:
-        mf1.add(os.path.join('test',filepath),['md5','sha1'])
+        mf1.add(os.path.join('test',filepath),['binhash-xxh','md5','sha1'])
 
     assert(len(mf1) == len(files))
 
@@ -116,7 +116,7 @@ def test_manifest_netcdf():
         mf1 = mf.Manifest('mf1.yaml')
 
         for filepath in glob.glob('*.nc'):
-            mf1.add(filepath,['binhash','md5','sha1'])
+            mf1.add(filepath,['binhash-xxh','binhash','md5','sha1'])
 
         mf1.dump()
 
@@ -125,7 +125,7 @@ def test_manifest_netcdf():
         mf2 = mf.Manifest('mf2.yaml')
         
         for filepath in glob.glob('*.nc'):
-            mf2.add(filepath,['binhash','md5','sha1'])
+            mf2.add(filepath,['binhash-xxh','binhash','md5','sha1'])
 
         mf2.dump()
 
@@ -139,7 +139,7 @@ def test_manifest_netcdf():
 
         mf1 = mf.Manifest('mf1.yaml')
         
-        mf1.add(glob.glob('*.nc'),['binhash'])
+        mf1.add(glob.glob('*.nc'),['binhash-xxh','binhash'])
         mf1.add(hashfn=['md5','sha1'])
 
     assert(mf1.equals(mf2))
@@ -152,10 +152,10 @@ def test_manifest_netcdf_changed_time():
 
         for filepath in glob.glob('*.nc'):
             touch(filepath)
-            mf3.add(filepath,['md5','sha1','binhash'])
+            mf3.add(filepath,['md5','sha1','binhash','binhash-xxh'])
 
         mf3.dump()
-        mf3.add(filepath,['md5','sha1','binhash'])
+        mf3.add(filepath,['md5','sha1','binhash','binhash-xxh'])
         mf2 = mf.Manifest('mf2.yaml')
         mf2.load()
 
@@ -176,7 +176,7 @@ def test_manifest_hash_with_binhash():
         mf4 = mf.Manifest('mf4.yaml')
 
         for filepath in glob.glob('*.bin'):
-            mf4.add(filepath,hashfn=['binhash', 'binhash-nomtime'])
+            mf4.add(filepath,hashfn=['binhash', 'binhash-nomtime', 'binhash-xxh'])
 
         mf4.dump()
         assert(mf4.check())
@@ -185,7 +185,7 @@ def test_manifest_hash_with_binhash():
 
         for filepath in glob.glob('*.bin'):
             touch(filepath)
-            mf5.add(filepath,hashfn=['binhash', 'binhash-nomtime'])
+            mf5.add(filepath,hashfn=['binhash', 'binhash-nomtime', 'binhash-xxh'])
 
         hashvals = {}
         assert(not mf4.check())
