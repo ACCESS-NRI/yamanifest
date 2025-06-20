@@ -27,6 +27,7 @@ requirements:
         - python
         - six
         - pyyaml
+        - python-xxhash
 test:
     imports:
         - yamanifest

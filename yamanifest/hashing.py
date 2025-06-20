@@ -21,6 +21,7 @@ limitations under the License.
 from __future__ import absolute_import, print_function
 
 import hashlib
+import xxhash # Fast hashing library
 import io
 import os
 import sys
@@ -31,11 +32,13 @@ one_hundred_megabytes = 104857600
 # List of supported hashes and the ordering used to determine relative expense of
 # calculation
 supported_hashes = [
-    'binhash', 'binhash-nomtime', 'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'
+    'binhash-xxh','binhash', 'binhash-nomtime', 'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512'
 ]
 
-def _binhash(path, size, include_mtime):
-    m = hashlib.new('md5')
+def _binhash(path, size, include_mtime, use_xxh=False):
+
+    m = xxhash.xxh3_64() if use_xxh else hashlib.new('md5')
+
     with io.open(path, mode="rb") as fd:
         # Size limited hashing, so prepend the filename, size and optionally modification time 
         hashstring = os.path.basename(path) + str(os.path.getsize(path))
