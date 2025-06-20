@@ -13,7 +13,8 @@ dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
     "PyYAML",
-    "six"
+    "six",
+    "xxhash",
 ]
 
 [project.scripts]
