@@ -37,7 +37,7 @@ supported_hashes = [
 
 def _binhash(path, size, include_mtime, use_xxh=False):
 
-    m = xxhash.xxh64() if use_xxh else hashlib.new('md5')
+    m = xxhash.xxh3_64() if use_xxh else hashlib.new('md5')
 
     with io.open(path, mode="rb") as fd:
         # Size limited hashing, so prepend the filename, size and optionally modification time 
