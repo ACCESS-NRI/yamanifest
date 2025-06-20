@@ -75,7 +75,7 @@ def hash(path, hashfn, size=one_hundred_megabytes):
     try:
         if hashfn == 'binhash-xxh':
             return _binhash(path, one_hundred_megabytes, True, use_xxh=True)
-        if hashfn == 'binhash':
+        elif hashfn == 'binhash':
             return _binhash(path, one_hundred_megabytes, True)
         elif hashfn == 'binhash-nomtime':
             return _binhash(path, one_hundred_megabytes, False)
