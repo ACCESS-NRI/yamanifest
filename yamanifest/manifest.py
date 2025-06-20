@@ -47,18 +47,32 @@ class Manifest(object):
 
     Attributes:
         path: a Path object for the manifest file
+        hashes: a set of hash functions to use when checking manifest validity
+        hashmax: maximum size of file to hash in bytes, default is 100MB
         data: an dictionary of manifest items
     """
 
-    def __init__(self, path, hashes=None, **kwargs):
+    def __init__(self, path, hashes=None, hashmax=None, **kwargs):
         """
         Return a Manifest object, initialised with a path
         to the manifest file. Optionally specify default
         order of hashes to use when checking manifest validity
+
+        Parameters:
+        -----------
+        path : str
+            Path to the manifest file
+        hashes : list, optional
+            List of hashes to use when checking manifest validity.
+            Default is ['binhash', 'md5'].
+        hashmax : int, optional
+            Maximum size of file to hash in bytes. Default is 100MB.
+
         """
         self.path = path
         self.data = {}
         self.header = {}
+        self.hashmax = hashmax
         try:
             self.numproc = mp.cpu_count()
         except NotImplementedError:
@@ -269,7 +283,7 @@ class Manifest(object):
 
         # print("Queuing jobs")
         for filepath, fn in zip(filepaths,hashfns):
-            results[filepath][fn] = pool.apply_async(hash, args=(self.data[filepath]["fullpath"], fn))
+            results[filepath][fn] = pool.apply_async(hash, args=(self.data[filepath]["fullpath"], fn, self.hashmax))
 
         pool.close()
         pool.join()
