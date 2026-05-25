@@ -5,6 +5,9 @@ on:
       tags:
         - '*'
 
+env:
+  PIP_UPLOADED_PRIOR_TO: P7D
+
 jobs:
   pypi:
     name: build and deploy to PyPI
