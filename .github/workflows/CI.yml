@@ -115,6 +115,10 @@ jobs:
           auto-activate-base: false
           show-channel-urls: true
 
+      - name: Pin pip for PIP_UPLOADED_PRIOR_TO support
+        shell: bash -l {0}
+        run: python3 -m pip install --upgrade 'pip>=26.1'
+
       - name: Install source
         shell: bash -l {0}
         run: python3 -m pip install --no-deps --no-build-isolation -e .
