@@ -13,7 +13,6 @@
 # serve to show the default.
 
 from importlib.metadata import version as get_version, PackageNotFoundError
-from recommonmark.parser import CommonMarkParser
 import sys
 import os
 
@@ -35,14 +34,11 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
+    'myst_parser',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
-
-source_parsers = {
-    '.md': CommonMarkParser,
-}
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
