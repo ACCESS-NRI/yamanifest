@@ -373,4 +373,3 @@ For More Information
 
 - Repository: https://github.com/ACCESS-NRI/yamanifest
 - PyPI Package: https://pypi.org/project/yamanifest/
-- API Documentation: See ``api/modules.rst``
