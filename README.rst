@@ -78,12 +78,3 @@ Development install::
 Run tests::
 
     python -m pytest -s
-
-Build documentation::
-
-    python setup.py build_sphinx
-    firefox docs/_build/index.html
-
-Upload documentation::
-
-    git subtree push --prefix docs/_build/html/ origin gh-pages
