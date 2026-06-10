@@ -196,8 +196,8 @@ The following hash algorithms are supported:
 - ``binhash-xxh`` - xxHash version of binhash. 
 - ``md5`` - `MD5 <https://en.wikipedia.org/wiki/MD5>`_ (default)
 - ``sha1`` - `SHA-1 <https://en.wikipedia.org/wiki/SHA-1>`_
-- ``sha256`` - `SHA-256 <SHA2>`_
-- ``sha512`` - `SHA-512 <SHA2>`_
+- ``sha256`` - `SHA-256 <SHA2_>`_
+- ``sha512`` - `SHA-512 <SHA2_>`_
 
 .. _SHA2: https://en.wikipedia.org/wiki/SHA-2
 
