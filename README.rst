@@ -38,6 +38,32 @@ Pip install (into a virtual environment)::
 Use
 ---
 
+See the `full usage documentation <https://yamanifest.readthedocs.io/en/latest/usage.html>`_ for comprehensive examples and API reference.
+
+Quick example:
+
+.. code-block:: bash
+
+    yamf add -n manifest.yaml file1.txt file2.txt
+    yamf check -n manifest.yaml
+
+Or programmatically:
+
+.. code-block:: python
+
+    from yamanifest import Manifest
+    
+    manifest = Manifest('manifest.yaml')
+    manifest.add(['file1.txt', 'file2.txt'])
+    manifest.dump()
+    
+    # Later, verify files
+    manifest = Manifest('manifest.yaml').load()
+    if manifest.check():
+        print("Files are valid")
+
+---------
+
 -------
 Develop
 -------
@@ -52,12 +78,3 @@ Development install::
 Run tests::
 
     python -m pytest -s
-
-Build documentation::
-
-    python setup.py build_sphinx
-    firefox docs/_build/index.html
-
-Upload documentation::
-
-    git subtree push --prefix docs/_build/html/ origin gh-pages

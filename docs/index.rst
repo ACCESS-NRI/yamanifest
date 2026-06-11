@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    readme.rst 
+   usage.rst
    api/autoindex.rst
    api/modules.rst
 
