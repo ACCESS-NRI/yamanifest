@@ -6,12 +6,6 @@ General YAML manifest format
 
 .. image:: https://readthedocs.org/projects/yamanifest/badge/?version=latest
   :target: https://readthedocs.org/projects/yamanifest/?badge=latest
-.. image:: https://travis-ci.org/aidanheerdegen/yamanifest.svg?branch=master
-  :target: https://travis-ci.org/aidanheerdegen/yamanifest
-.. image:: https://circleci.com/gh/coecms/yamanifest.svg?style=shield
-  :target: https://circleci.com/gh/coecms/yamanifest
-.. image:: http://codecov.io/github/aidanheerdegen/yamanifest/coverage.svg?branch=master
-  :target: http://codecov.io/github/aidanheerdegen/yamanifest?branch=master
 .. image:: https://badge.fury.io/py/yamanifest.svg
   :target: https://pypi.python.org/pypi/yamanifest
 
@@ -38,7 +32,7 @@ Pip install (into a virtual environment)::
 Use
 ---
 
-See the `full usage documentation <https://yamanifest.readthedocs.io/en/latest/usage.html>`_ for comprehensive examples and API reference.
+See the `full usage documentation <https://yamanifest.readthedocs.io>`_ for comprehensive examples and API reference.
 
 Quick example:
 
