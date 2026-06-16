@@ -11,6 +11,9 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+env:
+  PIP_UPLOADED_PRIOR_TO: P7D
+
 jobs:
   # JOB to run change in the build files
   changes:
@@ -111,6 +114,10 @@ jobs:
           auto-update-conda: false
           auto-activate-base: false
           show-channel-urls: true
+
+      - name: Pin pip for PIP_UPLOADED_PRIOR_TO support
+        shell: bash -l {0}
+        run: python3 -m pip install --upgrade 'pip>=26.1'
 
       - name: Install source
         shell: bash -l {0}
