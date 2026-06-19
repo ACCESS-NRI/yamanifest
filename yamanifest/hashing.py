@@ -70,15 +70,16 @@ def hash(path, hashfn, size=one_hundred_megabytes):
 
     TODO: make plugins that allow this transparently
     """
+    size = size or one_hundred_megabytes
     if hashfn not in supported_hashes:
         sys.stderr.write('\nUnsupported hash function {}, skipping {}\n'.format(hashfn, path))
     try:
         if hashfn == 'binhash-xxh':
-            return _binhash(path, one_hundred_megabytes, True, use_xxh=True)
+            return _binhash(path, size, True, use_xxh=True)
         elif hashfn == 'binhash':
-            return _binhash(path, one_hundred_megabytes, True)
+            return _binhash(path, size, True)
         elif hashfn == 'binhash-nomtime':
-            return _binhash(path, one_hundred_megabytes, False)
+            return _binhash(path, size, False)
         else:
             return _hashlib(path, hashfn)
     except IOError as e:
