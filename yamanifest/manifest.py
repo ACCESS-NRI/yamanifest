@@ -257,10 +257,22 @@ class Manifest(object):
 
         return hashval
         
-    def calc_hashes(self, filepaths, hashfns):
+    def calc_hashes(self, filepaths, hashfns, max_processes=None):
         """
         Calculate hash values for a number of filepaths and hash function combinations
         """
+        
+        # If max. processes is not passed, check environment variable, with a default set
+        # to 2 processes (which seems to work well on NCI Gadi)
+        default_max_processes = 2
+        if not max_processes:
+            max_processes = os.getenv("YAMANIFEST_HASH_MAX_PROCESSES", 
+                                      default=default_max_processes)
+
+        # But spawn at most as many processes as the number of cores, i.e., clamp any
+        # user-supplied value (either in the env, or as a parameter) to the
+        # number of cores
+        max_processes = min(max_processes, self.numproc)
         
         # print("Spawning pool")
         pool = mp.Pool(processes=self.numproc) #,maxtasksperchild=50)
